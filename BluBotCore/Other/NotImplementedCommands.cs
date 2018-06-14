@@ -59,6 +59,7 @@ namespace BluBotCore.Other
         //    }
 
         //    [Command("user")]
+        //    public async Task UsedUserCmdsAsync(IUser user)
         //    {
         //        var cmds = CommandHandler.usedCommands;
         //        if (cmds == null) return;
