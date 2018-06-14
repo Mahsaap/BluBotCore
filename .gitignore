@@ -1,0 +1,9 @@
+
+.vs/
+BluBotCore/bin/
+BluBotCore/obj/
+BluBotCore/Ignore/
+BluBotCore/init.txt
+BluBotCore/setup.txt
+BluBotCore/BluBotCore.csproj.user
+BluBotCore/Properties/
