@@ -32,7 +32,7 @@
 
   <ItemGroup>
     <Reference Include="SteamStoreQuery">
-      <HintPath>..\..\..\..\GitHub\SteamStoreQuery\SteamStoreQuery\SteamStoreQuery\bin\Debug\netstandard2.0\SteamStoreQuery.dll</HintPath>
+      <HintPath>..\..\SteamStoreQuery\SteamStoreQuery\SteamStoreQuery\bin\Debug\netstandard2.0\SteamStoreQuery.dll</HintPath>
     </Reference>
   </ItemGroup>
 
