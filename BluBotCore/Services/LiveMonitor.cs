@@ -28,10 +28,8 @@ namespace BluBotCore.Services
     {
         #region Private Variables
         private readonly DiscordSocketClient _client;
-        private LiveStreamMonitor _monitor;
         private readonly CommandService _commands;
         private readonly IServiceProvider _service;
-        private TwitchAPI api;
 
         private static List<string> chansName = new List<string>();
         private static List<string> chansID = new List<string>();
@@ -48,11 +46,9 @@ namespace BluBotCore.Services
 
         #region Public Properties
 
-        public LiveStreamMonitor Monitor { get => _monitor; }
-        public TwitchAPI API { get => api; }
-
+        public LiveStreamMonitor Monitor { get; private set; }
+        public TwitchAPI API { get; private set; }
         public List<String> ChansName { get => chansName; }
-
         public List<String> ChansID { get => chansID; }
         #endregion
 
@@ -77,11 +73,11 @@ namespace BluBotCore.Services
             }
             try
             {
-                api = new TwitchAPI();
+                API = new TwitchAPI();
                 try
                 {
-                    api.Settings.ClientId = AES.Decrypt(Cred.TwitchAPIID);
-                    api.Settings.AccessToken = AES.Decrypt(Cred.TwitchAPIToken);
+                    API.Settings.ClientId = AES.Decrypt(Cred.TwitchAPIID);
+                    API.Settings.AccessToken = AES.Decrypt(Cred.TwitchAPIToken);
                 }
                 catch (Exception ex)
                 {
@@ -89,7 +85,7 @@ namespace BluBotCore.Services
                     {
                         var mahsaap = _client.GetUser(88798728948809728) as IUser;
                         await mahsaap.SendMessageAsync("TwitchLib token has expired.");
-                        var token = await api.Auth.v5.RefreshAuthTokenAsync(
+                        var token = await API.Auth.v5.RefreshAuthTokenAsync(
                             AES.Decrypt(Cred.TwitchAPIRefreshToken), AES.Decrypt(Cred.TwitchAPIToken), AES.Decrypt(Cred.TwitchAPIID));
                         await mahsaap.SendMessageAsync("TwitchLib token has been refreshed.");
                         string dataOld;
@@ -107,26 +103,26 @@ namespace BluBotCore.Services
                         File.WriteAllLines("init.txt", tmpList);
                         await mahsaap.SendMessageAsync($"TwitchLib keys have been updated in file. Expires in {token.ExpiresIn}.");
 
-                        api.Settings.ClientId = AES.Decrypt(Cred.TwitchAPIID);
-                        api.Settings.AccessToken = AES.Decrypt(Cred.TwitchAPIToken);
+                        API.Settings.ClientId = AES.Decrypt(Cred.TwitchAPIID);
+                        API.Settings.AccessToken = AES.Decrypt(Cred.TwitchAPIToken);
                         Console.WriteLine($"{time} Monitor     Tokens have been refreshed,updated and started");
 
                     }
                 }
 
-                _monitor = new LiveStreamMonitor(api, 60, invokeEventsOnStart: false);
+                Monitor = new LiveStreamMonitor(API, 60, invokeEventsOnStart: false);
 
                 Console.WriteLine($"{time} Monitor     Instance Created");
 
                 await SetCastersAsync();
 
-                _monitor.OnStreamOnline += _monitor_OnStreamOnline;
-                _monitor.OnStreamMonitorStarted += _monitor_OnStreamMonitorStarted;
-                _monitor.OnStreamsSet += _monitor_OnStreamsSet;
-                _monitor.OnStreamOffline += _monitor_OnStreamOffline;
-                _monitor.OnStreamUpdate += _monitor_OnStreamUpdate;
+                Monitor.OnStreamOnline += _monitor_OnStreamOnline;
+                Monitor.OnStreamMonitorStarted += _monitor_OnStreamMonitorStarted;
+                Monitor.OnStreamsSet += _monitor_OnStreamsSet;
+                Monitor.OnStreamOffline += _monitor_OnStreamOffline;
+                Monitor.OnStreamUpdate += _monitor_OnStreamUpdate;
 
-                _monitor.StartService(); //Keep at the end!
+                Monitor.StartService(); //Keep at the end!
 
                 await Task.Delay(-1);
             }
@@ -170,7 +166,7 @@ namespace BluBotCore.Services
                     );
                 }
             }
-            else
+            /*else
             {
                 Task.Delay(250);
 
@@ -188,7 +184,7 @@ namespace BluBotCore.Services
                 ).Wait();
 
                 twitterURL = "";
-            }
+            }*/
         }
 
         private async Task OnStreamUpdateAsync(OnStreamUpdateArgs e)
@@ -326,23 +322,23 @@ namespace BluBotCore.Services
 
         public async Task SetCastersAsync()
         {
-            Team team = await api.Teams.v5.GetTeamAsync("wyktv");
+            Team team = await API.Teams.v5.GetTeamAsync("wyktv");
 
             foreach (Channel user in team.Users)
             {
                 chansName.Add(user.Name);
                 chansID.Add(user.Id);
             }
-            _monitor.SetStreamsByUserId(chansID);
+            Monitor.SetStreamsByUserId(chansID);
         }
 
         public async Task UpdateMonitorAsync()
         {
-            _monitor.StopService();
+            Monitor.StopService();
             chansName.Clear();
             chansID.Clear();
             await SetCastersAsync();
-            _monitor.StartService();
+            Monitor.StartService();
         }
 
 

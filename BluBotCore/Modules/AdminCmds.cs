@@ -21,8 +21,7 @@ namespace BluBotCore.Modules
     [RequireContext(ContextType.Guild)]
     public class AdminCmds : ModuleBase<SocketCommandContext>
     {
-
-
+        
         [Command("version")]
         public async Task VersionAsync()
         {
