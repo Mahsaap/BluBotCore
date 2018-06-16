@@ -134,7 +134,6 @@ namespace BluBotCore.Services
 
         private void _monitor_OnStreamOnline(object sender, OnStreamOnlineArgs e)
         {
-            Task.Delay(250);
             string url = @"https://www.twitch.tv/" + e.Stream.Channel.Name;
             EmbedBuilder eb = SetupLiveEmbed($":link: {e.Stream.Channel.DisplayName}", $"{e.Stream.Channel.Status}", $"{e.Stream.Channel.Game}",
                 e.Stream.Preview.Medium + Guid.NewGuid().ToString(), e.Stream.Channel.Logo, url);
@@ -166,10 +165,9 @@ namespace BluBotCore.Services
                     );
                 }
             }
+            //Removed for possible spamming to channel.
             /*else
             {
-                Task.Delay(250);
-
                 string url = @"https://www.twitch.tv/" + e.Stream.Channel.Name;
                 EmbedBuilder eb = SetupLiveEmbed($":link: {e.Stream.Channel.DisplayName}", $"{e.Stream.Channel.Status}", $"{e.Stream.Channel.Game}",
                     e.Stream.Preview.Medium + Guid.NewGuid().ToString(), e.Stream.Channel.Logo, url);
@@ -278,7 +276,6 @@ namespace BluBotCore.Services
 
             foreach (var e in Monitor.CurrentLiveStreams)
             {
-                await Task.Delay(250);
                 EmbedBuilder eb = SetupLiveEmbed($":link: {e.Channel.DisplayName}", $"{e.Channel.Status}", $"{e.Channel.Game}",
                 e.Preview.Medium + Guid.NewGuid().ToString(), e.Channel.Logo, @"https://www.twitch.tv/" + e.Channel.Name);
 
