@@ -47,7 +47,7 @@ namespace BluBotCore.Handlers
 
             if (msg.Severity == LogSeverity.Error || msg.Severity == LogSeverity.Warning || msg.Severity == LogSeverity.Critical)
             {
-                var mahsaap = _client.GetUser(88798728948809728) as IUser;
+                var mahsaap = _client.GetUser(Constants.Discord.Mahsaap) as IUser;
                 mahsaap.SendMessageAsync(msg.ToString());
             }
             Console.WriteLine(msg.ToString());

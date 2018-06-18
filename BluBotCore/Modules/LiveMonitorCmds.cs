@@ -22,8 +22,8 @@ namespace BluBotCore.Modules
         [Command("List")]
         public async Task LMListAsync()
         {
-            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == 101614418915266560) &&
-                !(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordWYKTVRole) && !(Context.User.Id == 88798728948809728)) return;
+            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == Constants.Discord.Space) &&
+                !(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordWYKTVRole) && !(Context.User.Id == Constants.Discord.Mahsaap)) return;
             if (_monitor.ChansName.Count <= 0) return;
             string result = $"**Casters being monitored:**\n";
             foreach (string entry in _monitor.ChansName)
@@ -36,24 +36,24 @@ namespace BluBotCore.Modules
         [Command("count")]
         public async Task LMCountAsync()
         {
-            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == 101614418915266560) &&
-                !(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordWYKTVRole) && !(Context.User.Id == 88798728948809728)) return;
+            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == Constants.Discord.Space) &&
+                !(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordWYKTVRole) && !(Context.User.Id == Constants.Discord.Mahsaap)) return;
             await ReplyAsync($"Currently monitoring {_monitor.ChansName.Count} channels!");
 
         }
         [Command("Update")]
         public async Task LMUpdateAsync()
         {
-            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == 101614418915266560)
-                && !(Context.User.Id == 88798728948809728)) return;
+            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == Constants.Discord.Space)
+                && !(Context.User.Id == Constants.Discord.Mahsaap)) return;
             await _monitor.UpdateMonitorAsync();
         }
 
         [Command("addserver")]
         public async Task AddServer(string channelName, ulong channelID)
         {
-            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == 101614418915266560)
-                && !(Context.User.Id == 88798728948809728)) return;
+            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == Constants.Discord.Space)
+                && !(Context.User.Id == Constants.Discord.Mahsaap)) return;
             string msg = "";
             if (!LiveMonitor.sepServerList.ContainsKey(channelName))
             {
@@ -71,8 +71,8 @@ namespace BluBotCore.Modules
         [Command("removeserver")]
         public async Task RemoveServer(string channelName)
         {
-            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == 101614418915266560)
-                && !(Context.User.Id == 88798728948809728)) return;
+            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == Constants.Discord.Space)
+                && !(Context.User.Id == Constants.Discord.Mahsaap)) return;
             string msg = "";
             if (LiveMonitor.sepServerList.ContainsKey(channelName))
             {

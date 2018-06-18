@@ -14,8 +14,8 @@ namespace BluBotCore.Modules
         [Command("tweet")]
         public async Task TweetTextAsync([Remainder]string text)
         {
-            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == 101614418915266560)
-                && !(Context.User.Id == 88798728948809728)) return;
+            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == Constants.Discord.Space)
+                && !(Context.User.Id == Constants.Discord.Mahsaap)) return;
             //280 char max
             if (text.Length < 280)
             {

@@ -1,6 +1,5 @@
 ﻿using BluBotCore.Handlers;
 using BluBotCore.Other;
-using BluBotCore.Services;
 
 using Discord;
 using Discord.Addons.Interactive;

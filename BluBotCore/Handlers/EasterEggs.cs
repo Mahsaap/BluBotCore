@@ -150,7 +150,7 @@ namespace BluBotCore.Handlers
 
         private async Task DMAsync(string user)
         {
-            var mahsaap = _client.GetUser(88798728948809728) as IUser;
+            var mahsaap = _client.GetUser(Constants.Discord.Mahsaap) as IUser;
             await mahsaap.SendMessageAsync($"Easter Egg for {user} has triggered!");
         }
     }

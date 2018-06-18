@@ -25,8 +25,8 @@ namespace BluBotCore.Modules
         [Command("version")]
         public async Task VersionAsync()
         {
-            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == 101614418915266560) &&
-                !(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordWYKTVRole) && !(Context.User.Id == 88798728948809728)) return;
+            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == Constants.Discord.Space) &&
+                !(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordWYKTVRole) && !(Context.User.Id == Constants.Discord.Mahsaap)) return;
             await ReplyAsync("V1.05");
         }
 
@@ -34,8 +34,8 @@ namespace BluBotCore.Modules
         [Command("shutdown"), Summary("Shuts down the bot.")]
         public async Task ShutdownBotAsync()
         {
-            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == 101614418915266560)
-                && !(Context.User.Id == 88798728948809728)) return;
+            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == Constants.Discord.Space)
+                && !(Context.User.Id == Constants.Discord.Mahsaap)) return;
             await Context.Client.SetStatusAsync(UserStatus.Invisible);
             await Task.Delay(500);
             await ReplyAsync($"**Shutting Down!**");
@@ -45,8 +45,8 @@ namespace BluBotCore.Modules
         [Command("SetWYKTVRole")]
         public async Task WYKTVRoleSet(IRole role)
         {
-            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == 101614418915266560)
-                && !(Context.User.Id == 88798728948809728)) return;
+            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == Constants.Discord.Space)
+                && !(Context.User.Id == Constants.Discord.Mahsaap)) return;
             Setup.DiscordWYKTVRole = role.Id;
             await ReplyAsync($"WYKTV role set as {role.Name} - ({role.Id})");
             string filename = "setup.txt";
@@ -62,8 +62,8 @@ namespace BluBotCore.Modules
         [Command("SetLiveChannel")]
         public async Task LiveChannelSet(IGuildChannel chan)
         {
-            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == 101614418915266560)
-                && !(Context.User.Id == 88798728948809728)) return;
+            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == Constants.Discord.Space)
+                && !(Context.User.Id == Constants.Discord.Mahsaap)) return;
             Setup.DiscordAnnounceChannel = chan.Id;
             await ReplyAsync($"Live Channel set as {chan.Name} - ({chan.Id})");
             string filename = "setup.txt";
@@ -79,8 +79,8 @@ namespace BluBotCore.Modules
         [Command("SetLogChannel")]
         public async Task LogChannelSet(IGuildChannel chan)
         {
-            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == 101614418915266560)
-                && !(Context.User.Id == 88798728948809728)) return;
+            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == Constants.Discord.Space)
+                && !(Context.User.Id == Constants.Discord.Mahsaap)) return;
             Setup.DiscordLogChannel = chan.Id;
             await ReplyAsync($"Log Channel set as {chan.Name} - ({chan.Id})");
             string filename = "setup.txt";
@@ -97,8 +97,8 @@ namespace BluBotCore.Modules
         [Command("DisableLogChannel")]
         public async Task DisableLogChannel()
         {
-            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == 101614418915266560)
-                && !(Context.User.Id == 88798728948809728)) return;
+            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == Constants.Discord.Space)
+                && !(Context.User.Id == Constants.Discord.Mahsaap)) return;
             Setup.DiscordLogChannel = 0;
             await ReplyAsync($"Log Channel has been disabled.");
             string filename = "setup.txt";
@@ -116,8 +116,8 @@ namespace BluBotCore.Modules
         [Command("botinfo"), Summary("Bot framework info.")]
         public async Task BotInfoAsync()
         {
-            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == 101614418915266560) &&
-                !(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordWYKTVRole) && !(Context.User.Id == 88798728948809728)) return;
+            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == Constants.Discord.Space) &&
+                !(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordWYKTVRole) && !(Context.User.Id == Constants.Discord.Mahsaap)) return;
             RestApplication application = await Context.Client.GetApplicationInfoAsync();
             string guildsString = "";
             foreach (SocketGuild g in Context.Client.Guilds) guildsString += $"{g.Name} (Channels: {g.Channels.Count} - Users: {g.Users.Count})\n";
@@ -183,8 +183,8 @@ namespace BluBotCore.Modules
         [Command("purge"), Summary("Purge messages.")]
         public async Task PurgeMsgAsync(int num)
         {
-            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == 101614418915266560)
-                && !(Context.User.Id == 88798728948809728)) return;
+            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == Constants.Discord.Space)
+                && !(Context.User.Id == Constants.Discord.Mahsaap)) return;
             if (num > 0 && num < 100) // Limit 100 - Minus 1 for your command to purge.
             {
                 try
@@ -206,8 +206,8 @@ namespace BluBotCore.Modules
         [Command("setplaying", RunMode = RunMode.Async)]
         public async Task SetPlayingAsync([Remainder]string entry)
         {
-            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == 101614418915266560)
-                && !(Context.User.Id == 88798728948809728)) return;
+            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == Constants.Discord.Space)
+                && !(Context.User.Id == Constants.Discord.Mahsaap)) return;
             await Context.Client.SetGameAsync(entry);
         }
 
@@ -218,8 +218,8 @@ namespace BluBotCore.Modules
         [Summary("Change bot nickname.")]
         public async Task BotNickAsync([Remainder]string name)
         {
-            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == 101614418915266560)
-                && !(Context.User.Id == 88798728948809728)) return;
+            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == Constants.Discord.Space)
+                && !(Context.User.Id == Constants.Discord.Mahsaap)) return;
             var guild = Context.Guild as IGuild;
             IGuildUser self = await guild.GetCurrentUserAsync();
             await self.ModifyAsync(x => x.Nickname = name);
@@ -233,8 +233,8 @@ namespace BluBotCore.Modules
         [Summary("Change a users nickname.")]
         public async Task UserNickAsync(IUser user, [Remainder]string name)
         {
-            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == 101614418915266560)
-                && !(Context.User.Id == 88798728948809728)) return;
+            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == Constants.Discord.Space)
+                && !(Context.User.Id == Constants.Discord.Mahsaap)) return;
             var guild = Context.Guild as IGuild;
             var usr = user as IGuildUser;
             await usr.ModifyAsync(x => x.Nickname = name);
@@ -246,8 +246,8 @@ namespace BluBotCore.Modules
         [Command("UserRoles"), Summary("Specified user's current roles.")]
         public async Task UserRolesAsync(IGuildUser user)
         {
-            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == 101614418915266560)
-                && !(Context.User.Id == 88798728948809728)) return;
+            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == Constants.Discord.Space)
+                && !(Context.User.Id == Constants.Discord.Mahsaap)) return;
             var roles = user.Guild.Roles;
             string title = $"{user.Username}'s Role List in {Context.Guild.Name}";
             StringBuilder strB = new StringBuilder();
@@ -269,8 +269,8 @@ namespace BluBotCore.Modules
         [Command("uptime"), Summary("Bot uptime.")]
         public async Task UptimeAsync()
         {
-            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == 101614418915266560) &&
-                !(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordWYKTVRole) && !(Context.User.Id == 88798728948809728)) return;
+            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == Constants.Discord.Space) &&
+                !(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordWYKTVRole) && !(Context.User.Id == Constants.Discord.Mahsaap)) return;
             await ReplyAsync($"Active for {GetUptime()}.");
         }
 
@@ -279,8 +279,8 @@ namespace BluBotCore.Modules
         [Command("listroles"), Summary("Roles or users with specified role")]
         public async Task ListRoleAsync([Remainder]IRole irole = null)
         {
-            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == 101614418915266560)
-                && !(Context.User.Id == 88798728948809728)) return;
+            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == Constants.Discord.Space)
+                && !(Context.User.Id == Constants.Discord.Mahsaap)) return;
             var guild = Context.Guild as SocketGuild;
             StringBuilder strB = new StringBuilder();
 
@@ -340,8 +340,8 @@ namespace BluBotCore.Modules
         [Command("multi"), Summary("Urls for multi streams.")]
         public async Task MultiCastAsync([Remainder]string casters = null)
         {
-            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == 101614418915266560) &&
-                !(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordWYKTVRole) && !(Context.User.Id == 88798728948809728)) return;
+            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == Constants.Discord.Space) &&
+                !(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordWYKTVRole) && !(Context.User.Id == Constants.Discord.Mahsaap)) return;
             string[] casterList = casters.Split(' ');
             string result = "";
             foreach (string cast in casterList)
@@ -356,8 +356,8 @@ namespace BluBotCore.Modules
         [Command("caster"), Summary("Caster announce command.")]
         public async Task CasterAsync(string tname = null)
         {
-            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == 101614418915266560) &&
-                !(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordWYKTVRole) && !(Context.User.Id == 88798728948809728)) return;
+            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == Constants.Discord.Space) &&
+                !(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordWYKTVRole) && !(Context.User.Id == Constants.Discord.Mahsaap)) return;
             if (tname != null)
             {
                 //string twitch = "https://www.twitch.tv/";
@@ -370,8 +370,8 @@ namespace BluBotCore.Modules
         [Command("userinfo"), Alias("user", "whois"), Summary("Current or the specified user info.")]
         public async Task UserInfoAsync([Summary("The (optional) user to get info for")] SocketGuildUser user = null)
         {
-            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == 101614418915266560)
-                && !(Context.User.Id == 88798728948809728)) return;
+            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == Constants.Discord.Space)
+                && !(Context.User.Id == Constants.Discord.Mahsaap)) return;
             var userInfo = user ?? Context.User as SocketGuildUser;
             await ReplyAsync(
                 $"User Info\n" +
@@ -391,8 +391,8 @@ namespace BluBotCore.Modules
         [Command("serverinfo"), Alias("server", "guildinfo", "guild"), Summary("Guild info.")]
         public async Task ServerInfoAsync()
         {
-            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == 101614418915266560)
-                && !(Context.User.Id == 88798728948809728)) return;
+            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == Constants.Discord.Space)
+                && !(Context.User.Id == Constants.Discord.Mahsaap)) return;
             var guild = Context.Guild as IGuild;
             var users = await guild.GetUsersAsync();
             IGuildChannel defaultChan = await guild.GetChannelAsync(guild.DefaultChannelId);
@@ -423,8 +423,8 @@ namespace BluBotCore.Modules
         [Command("test"), Alias("ping", "check"), Summary("Bot 'ping' test command.")]
         public async Task TestAsync()
         {
-            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == 101614418915266560)
-                && !(Context.User.Id == 88798728948809728)) return;
+            if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == Constants.Discord.Space)
+                && !(Context.User.Id == Constants.Discord.Mahsaap)) return;
             string msg = $"Pong! - {Context.Client.Latency}ms";
             await ReplyAsync(msg);
         }

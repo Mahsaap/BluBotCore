@@ -1,4 +1,5 @@
 ﻿using BluBotCore.Other;
+
 using Discord;
 using Discord.Commands;
 using Discord.Rest;
@@ -83,7 +84,7 @@ namespace BluBotCore.Services
                 {
                     if (ex is TokenExpiredException)
                     {
-                        var mahsaap = _client.GetUser(88798728948809728) as IUser;
+                        var mahsaap = _client.GetUser(Constants.Discord.Mahsaap) as IUser;
                         await mahsaap.SendMessageAsync("TwitchLib token has expired.");
                         var token = await API.Auth.v5.RefreshAuthTokenAsync(
                             AES.Decrypt(Cred.TwitchAPIRefreshToken), AES.Decrypt(Cred.TwitchAPIToken), AES.Decrypt(Cred.TwitchAPIID));
@@ -110,7 +111,7 @@ namespace BluBotCore.Services
                     }
                 }
 
-                Monitor = new LiveStreamMonitor(API, 60, invokeEventsOnStart: false);
+                Monitor = new LiveStreamMonitor(API, 120, invokeEventsOnStart: false);
 
                 Console.WriteLine($"{time} Monitor     Instance Created");
 
@@ -406,7 +407,7 @@ namespace BluBotCore.Services
             }
             catch (Exception ex)
             {
-                var mahsaap = _client.GetUser(88798728948809728) as IUser;
+                var mahsaap = _client.GetUser(Constants.Discord.Mahsaap) as IUser;
                 await mahsaap.SendMessageAsync(ex.Message + "\n" + ex.StackTrace);
             }
         }
