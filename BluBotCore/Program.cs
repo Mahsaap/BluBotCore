@@ -1,10 +1,15 @@
 ﻿using BluBotCore.Services;
+using System;
+using System.Threading.Tasks;
 
 namespace BluBotCore
 {
     class Program
     {
-        public static void Main(string[] args)
-            => new DiscordClient().MainAsync().GetAwaiter().GetResult();
+        public static async Task Main(string[] args)
+        {
+            DiscordClient _discord = new DiscordClient();
+            await _discord.MainAsync();
+        }
     }
 }
