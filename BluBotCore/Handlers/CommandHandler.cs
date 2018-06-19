@@ -1,6 +1,5 @@
 ﻿using Discord.Commands;
 using Discord.WebSocket;
-
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -29,8 +28,7 @@ namespace BluBotCore.Handlers
 
         private async Task HandleCommandAsync(SocketMessage messageParam)
         {
-            var message = messageParam as SocketUserMessage;
-            if (message == null) return;
+            if (!(messageParam is SocketUserMessage message)) return;
             int argPos = 0;
             if (!(message.HasCharPrefix('!', ref argPos) || message.HasMentionPrefix(_client.CurrentUser, ref argPos))) return;
             SocketCommandContext context = new SocketCommandContext(_client, message);
