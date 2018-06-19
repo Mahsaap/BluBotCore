@@ -1,9 +1,7 @@
-﻿using Discord;
+﻿using BluBotCore.Other;
 using Discord.Commands;
-using System.Threading.Tasks;
-using System.Linq;
-using BluBotCore.Other;
 using Discord.WebSocket;
+using System.Threading.Tasks;
 
 namespace BluBotCore.Modules
 {

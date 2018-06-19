@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BluBotCore.Constants
+﻿namespace BluBotCore.Constants
 {
     public class Discord
     {
