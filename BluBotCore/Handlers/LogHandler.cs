@@ -46,8 +46,10 @@ namespace BluBotCore.Handlers
 
             if (msg.Severity == LogSeverity.Error || msg.Severity == LogSeverity.Warning || msg.Severity == LogSeverity.Critical)
             {
-                var mahsaap = _client.GetUser(Constants.Discord.Mahsaap) as IUser;
-                mahsaap.SendMessageAsync(msg.ToString());
+                string msge = msg.ToString();
+                if (msg.Message.Contains("System.Exception: Unexpected close")) msge = msg.Message;
+                var mahsaap = _client.GetUser(88798728948809728) as IUser;
+                mahsaap.SendMessageAsync(msge);
             }
             Console.WriteLine(msg.ToString());
             Console.ResetColor();
