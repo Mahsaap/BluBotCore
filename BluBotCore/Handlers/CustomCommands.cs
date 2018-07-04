@@ -1,9 +1,6 @@
 ﻿using BluBotCore.Other;
-
 using Discord;
-using Discord.Rest;
 using Discord.WebSocket;
-
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -48,7 +45,7 @@ namespace BluBotCore.Handlers
                 }
 
                 if ((message.Author as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) ||
-                (message.Author as IGuildUser).RoleIds.Contains(Setup.DiscordWYKTVRole) || (message.Author.Id == 88798728948809728))
+                (message.Author as IGuildUser).RoleIds.Contains(Setup.DiscordWYKTVRole) || (message.Author.Id == Constants.Discord.Mahsaap))
                 {
                     //Add Check
                     if (command == "add")

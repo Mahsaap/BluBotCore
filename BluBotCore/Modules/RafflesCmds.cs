@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace BluBotCore.Modules
 {
+    //BROKEN ATM
     //[Name("Raffle")]
     //[RequireContext(ContextType.Guild)]
     public class RafflesCmds : InteractiveBase<SocketCommandContext>

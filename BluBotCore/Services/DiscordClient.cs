@@ -1,6 +1,5 @@
 ﻿using BluBotCore.Handlers;
 using BluBotCore.Other;
-using BluBotCore.Services;
 
 using Discord;
 using Discord.Addons.Interactive;
@@ -36,7 +35,7 @@ namespace BluBotCore.Services
             _client = new DiscordSocketClient(new DiscordSocketConfig
             {
                 WebSocketProvider = WS4NetProvider.Instance,
-                LogLevel = LogSeverity.Debug,
+                LogLevel = LogSeverity.Verbose,
                 MessageCacheSize = 100,
                 AlwaysDownloadUsers = true
             });

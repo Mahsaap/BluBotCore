@@ -1,11 +1,10 @@
-﻿using BluBotCore.Other;
+﻿using BluBotCore.Preconditions;
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
 using StrawPollNET.Models;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace BluBotCore.Modules
@@ -20,11 +19,10 @@ namespace BluBotCore.Modules
             private static CreatedPoll currentPoll;
             private static List<CreatedPoll> pastPolls = new List<CreatedPoll>();
 
+            [RequireRoleOrID]
             [Command("create", RunMode = RunMode.Async)]
             public async Task SPCreateAsync()
             {
-                if (!(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) && !(Context.User.Id == 101614418915266560) &&
-                    !(Context.User as IGuildUser).RoleIds.Contains(Setup.DiscordWYKTVRole) && !(Context.User.Id == 88798728948809728)) return;
                 SocketMessage title = await ResponseAsync(Context.Channel, "**Enter Title**"); //Verify empty check fail or not
                 SocketMessage options = await ResponseAsync(Context.Channel, "**Enter Options (Seperated by a comma)**");
                 string[] optsArray = options.Content.Split(',');

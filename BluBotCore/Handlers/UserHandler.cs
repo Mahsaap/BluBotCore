@@ -1,9 +1,6 @@
 ﻿using BluBotCore.Other;
-using Discord.Commands;
 using Discord.WebSocket;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BluBotCore.Handlers
@@ -11,7 +8,7 @@ namespace BluBotCore.Handlers
     class UserHandler
     {
         private readonly DiscordSocketClient _client;
-        private IServiceProvider _service;
+        private readonly IServiceProvider _service;
         public UserHandler(IServiceProvider service, DiscordSocketClient client)
         {
             _client = client;

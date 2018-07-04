@@ -1,7 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-
 using System;
 using System.Threading.Tasks;
 
@@ -47,8 +46,10 @@ namespace BluBotCore.Handlers
 
             if (msg.Severity == LogSeverity.Error || msg.Severity == LogSeverity.Warning || msg.Severity == LogSeverity.Critical)
             {
+                string msge = msg.ToString();
+                if (msg.Message.Contains("System.Exception: Unexpected close")) msge = msg.Message;
                 var mahsaap = _client.GetUser(88798728948809728) as IUser;
-                mahsaap.SendMessageAsync(msg.ToString());
+                mahsaap.SendMessageAsync(msge);
             }
             Console.WriteLine(msg.ToString());
             Console.ResetColor();
