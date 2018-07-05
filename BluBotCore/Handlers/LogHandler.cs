@@ -47,7 +47,7 @@ namespace BluBotCore.Handlers
             if (msg.Severity == LogSeverity.Error || msg.Severity == LogSeverity.Warning || msg.Severity == LogSeverity.Critical)
             {
                 string msge = msg.ToString();
-                if (msg.Message.Contains("System.Exception: Unexpected close")) msge = msg.Message;
+                if (msg.ToString().ToLower().Contains("unexpected close")) msge = msg.Message;
                 var mahsaap = _client.GetUser(88798728948809728) as IUser;
                 mahsaap.SendMessageAsync(msge);
             }
