@@ -41,10 +41,9 @@ namespace BluBotCore.Modules
         }
 
         [Command("egg")]
-        public async Task EggAsync()
+        public void EggAsync()
         {
             EasterEggs.easterEggEnable = !EasterEggs.easterEggEnable;
-            await Task.CompletedTask;
         }
 
         [Command("encrypt")]
