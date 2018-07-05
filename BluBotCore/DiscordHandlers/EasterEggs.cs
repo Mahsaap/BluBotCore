@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace BluBotCore.Handlers
+namespace BluBotCore.DiscordHandlers
 {
     class EasterEggs
     {

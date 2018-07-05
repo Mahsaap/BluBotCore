@@ -1,4 +1,4 @@
-﻿using BluBotCore.Handlers;
+﻿using BluBotCore.DiscordHandlers;
 using BluBotCore.Other;
 using Discord;
 using Discord.Commands;

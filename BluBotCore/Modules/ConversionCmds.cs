@@ -1,10 +1,7 @@
-﻿using Discord;
-using Discord.Addons.Interactive;
+﻿using Discord.Addons.Interactive;
 using Discord.Commands;
-using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
 
