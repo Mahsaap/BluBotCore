@@ -15,8 +15,8 @@ using Tweetinvi;
 using Tweetinvi.Parameters;
 using TwitchLib.Api;
 using TwitchLib.Api.Exceptions;
-using TwitchLib.Api.Models.v5.Teams;
 using TwitchLib.Api.Models.v5.Channels;
+using TwitchLib.Api.Models.v5.Teams;
 using TwitchLib.Api.Services;
 using TwitchLib.Api.Services.Events.LiveStreamMonitor;
 
@@ -32,15 +32,11 @@ namespace BluBotCore.Services
             private static DateTime _onlineTime;
             private static string _twitterURL = "";
 
-            #region Lists
-                private static List<string> _chansName = new List<string>();
-                private static List<string> _chansID = new List<string>();
-            #endregion
+            private static List<string> _chansName = new List<string>();
+            private static List<string> _chansID = new List<string>();
 
-            #region Dictionaries
-                private static ConcurrentDictionary<string, Tuple<RestUserMessage, string, string>> _sepliveEmbeds = new ConcurrentDictionary<string, Tuple<RestUserMessage, string, string>>();
-                private static ConcurrentDictionary<string, Tuple<RestUserMessage,string,string>> _liveEmbeds = new ConcurrentDictionary<string, Tuple<RestUserMessage,string,string>>();
-        #endregion
+            private static ConcurrentDictionary<string, Tuple<RestUserMessage, string, string>> _sepliveEmbeds = new ConcurrentDictionary<string, Tuple<RestUserMessage, string, string>>();
+            private static ConcurrentDictionary<string, Tuple<RestUserMessage,string,string>> _liveEmbeds = new ConcurrentDictionary<string, Tuple<RestUserMessage,string,string>>();
         #endregion
 
         #region Public Variables
@@ -119,11 +115,11 @@ namespace BluBotCore.Services
 
                 await SetCastersAsync();
 
-                Monitor.OnStreamOnline += _monitor_OnStreamOnline;
-                Monitor.OnStreamMonitorStarted += _monitor_OnStreamMonitorStarted;
-                Monitor.OnStreamsSet += _monitor_OnStreamsSet;
-                Monitor.OnStreamOffline += _monitor_OnStreamOffline;
-                Monitor.OnStreamUpdate += _monitor_OnStreamUpdate;
+                Monitor.OnStreamOnline += Monitor_OnStreamOnline;
+                Monitor.OnStreamMonitorStarted += Monitor_OnStreamMonitorStarted;
+                Monitor.OnStreamsSet += Monitor_OnStreamsSet;
+                Monitor.OnStreamOffline += Monitor_OnStreamOffline;
+                Monitor.OnStreamUpdate += Monitor_OnStreamUpdate;
 
                 Monitor.StartService(); //Keep at the end!
 
@@ -135,7 +131,7 @@ namespace BluBotCore.Services
             }
         }
 
-        private async void _monitor_OnStreamOnline(object sender, OnStreamOnlineArgs e)
+        private async void Monitor_OnStreamOnline(object sender, OnStreamOnlineArgs e)
         {
             string url = @"https://www.twitch.tv/" + e.Stream.Channel.Name;
             EmbedBuilder eb = SetupLiveEmbed($":link: {e.Stream.Channel.DisplayName}", $"{e.Stream.Channel.Status}", $"{e.Stream.Channel.Game}",
@@ -153,7 +149,7 @@ namespace BluBotCore.Services
             _twitterURL = "";
         }
 
-        private async void _monitor_OnStreamUpdate(object sender, OnStreamUpdateArgs e)
+        private async void Monitor_OnStreamUpdate(object sender, OnStreamUpdateArgs e)
         {
             if (_liveEmbeds.ContainsKey(e.ChannelId))
             {
@@ -187,7 +183,7 @@ namespace BluBotCore.Services
             }
         }
 
-        private async void _monitor_OnStreamOffline(object sender, OnStreamOfflineArgs e)
+        private async void Monitor_OnStreamOffline(object sender, OnStreamOfflineArgs e)
         {
             string time = DateTime.Now.ToString("HH:MM:ss");
             Console.WriteLine($"{time} Monitor     {e.Channel} is offline");
@@ -208,13 +204,13 @@ namespace BluBotCore.Services
             }
         }
 
-        private void _monitor_OnStreamsSet(object sender, OnStreamsSetArgs e)
+        private void Monitor_OnStreamsSet(object sender, OnStreamsSetArgs e)
         {
             string time = DateTime.Now.ToString("HH:MM:ss");
             Console.WriteLine($"{time} Monitor     Streams Set!");
         }
 
-        private async void _monitor_OnStreamMonitorStarted(object sender, OnStreamMonitorStartedArgs e)
+        private async void Monitor_OnStreamMonitorStarted(object sender, OnStreamMonitorStartedArgs e)
         {
             _onlineTime = DateTime.Now;
             _twitterURL = "";
@@ -283,23 +279,23 @@ namespace BluBotCore.Services
 
         public async Task SetCastersAsync()
         {
-            //Team team = await API.Teams.v5.GetTeamAsync("wyktv");
+            Team team = await API.Teams.v5.GetTeamAsync("wyktv");
 
-            //foreach (Channel user in team.Users)
-            //{
-            //    _chansName.Add(user.Name);
-            //    _chansID.Add(user.Id);
-            //}
-            //Monitor.SetStreamsByUserId(_chansID);
+            foreach (Channel user in team.Users)
+            {
+                _chansName.Add(user.Name);
+                _chansID.Add(user.Id);
+            }
+            Monitor.SetStreamsByUserId(_chansID);
 
 
             //Testing
-            List<string> testList = new List<string>() { "mahsaap" };
-            var user = await API.Users.v5.GetUserByNameAsync("mahsaap");
-            var testUser = await API.Channels.v5.GetChannelByIDAsync(user.Matches[0].Id);
-            _chansID.Add(testUser.Id);
-            _chansName.Add(testUser.Name);
-            Monitor.SetStreamsByUserId(_chansID);
+            //List<string> testList = new List<string>() { "mahsaap" };
+            //var user = await API.Users.v5.GetUserByNameAsync("mahsaap");
+            //var testUser = await API.Channels.v5.GetChannelByIDAsync(user.Matches[0].Id);
+            //_chansID.Add(testUser.Id);
+            //_chansName.Add(testUser.Name);
+            //Monitor.SetStreamsByUserId(_chansID);
         }
 
         public async Task UpdateMonitorAsync()

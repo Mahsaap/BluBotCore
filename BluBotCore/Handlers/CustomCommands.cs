@@ -24,10 +24,10 @@ namespace BluBotCore.Handlers
             _client = client;
             _service = service;
 
-            _client.MessageReceived += _client_MessageReceived;
+            _client.MessageReceived += Client_MessageReceived;
         }
 
-        private async Task _client_MessageReceived(SocketMessage message)
+        private async Task Client_MessageReceived(SocketMessage message)
         {
             if (message.Author.Id == _client.CurrentUser.Id) return;
             var chan = message.Channel as SocketTextChannel;
