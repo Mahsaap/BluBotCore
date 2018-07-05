@@ -17,10 +17,11 @@ namespace BluBotCore.Services
         {
             _client = client;
             _service = service;
-            Task.Run(() => StartAsync());
+
+            TwitterStart();
         }
 
-        private async Task StartAsync()
+        private void TwitterStart()
         {
             Auth.SetUserCredentials(AES.Decrypt(Cred.TwitterConsumerKey), AES.Decrypt(Cred.TwitterConsumerSecret)
                 , AES.Decrypt(Cred.TwitterAccessKey), AES.Decrypt(Cred.TwitterAccessSecret));
@@ -28,8 +29,6 @@ namespace BluBotCore.Services
 
             string time = DateTime.Now.ToString("HH:MM:ss");
             Console.WriteLine($"{time} Twitter     Connected to {authenticatedUser}");
-
-            await Task.CompletedTask;
         }
     }
 }
