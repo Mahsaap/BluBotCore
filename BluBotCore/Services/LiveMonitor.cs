@@ -370,7 +370,7 @@ namespace BluBotCore.Services
             {
                 WebClient webClient = new WebClient();
                 byte[] image = webClient.DownloadData(url);
-                //attempt to get an image 10 times
+
                 for (int i = 0; i < TWITCH_PINK_SCREEN_RETRY_ATTEMPTS; i++)
                 {
                     byte[] hash;
