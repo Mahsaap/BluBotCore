@@ -35,7 +35,7 @@ namespace BluBotCore.Services
             private static readonly int TWITCH_PINK_SCREEN_RETRY_DELAY = 15000; //ms
 
             #region Lists
-        private static List<string> _chansName = new List<string>();
+                private static List<string> _chansName = new List<string>();
                 private static List<string> _chansID = new List<string>();
             #endregion
 
