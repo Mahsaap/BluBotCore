@@ -369,11 +369,10 @@ namespace BluBotCore.Services
             try
             {
                 WebClient webClient = new WebClient();
-                byte[] image = null;
+                byte[] image = webClient.DownloadData(url);
                 //attempt to get an image 10 times
                 for (int i = 0; i < TWITCH_PINK_SCREEN_RETRY_ATTEMPTS; i++)
                 {
-                    image = webClient.DownloadData(url);
                     byte[] hash;
                     using (var sha256 = System.Security.Cryptography.SHA256.Create())
                     {
@@ -384,6 +383,7 @@ namespace BluBotCore.Services
                         //pink screen detected. Lets sleep for X seconds and try again. 
                         Console.WriteLine($"{DateTime.Now.ToString("HH:MM:ss")} Twitter     Detected Pink Screen for {url}, trying again in {TWITCH_PINK_SCREEN_RETRY_DELAY}, attempt {i+1} out of {TWITCH_PINK_SCREEN_RETRY_ATTEMPTS}" );
                         await Task.Delay(TWITCH_PINK_SCREEN_RETRY_DELAY);
+                        image = webClient.DownloadData(url);
                     } else
                     {
                         //not a pink screen. Break out of loop
