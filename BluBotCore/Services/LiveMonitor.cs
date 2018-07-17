@@ -30,7 +30,9 @@ namespace BluBotCore.Services
             private readonly IServiceProvider _service;
 
             private static DateTime _onlineTime;
-            private static string _twitterURL = "";
+            private static readonly byte[] TWITCH_PINK_SCREEN_CHECKSUM = new byte[] { 11, 241, 144, 174, 218, 192, 175, 31, 120, 108, 52, 36, 55, 174, 200, 134, 12, 8, 223, 245, 175, 184, 76, 16, 140, 201, 39, 57, 123, 39, 23, 78 };
+            private static readonly int TWITCH_PINK_SCREEN_RETRY_ATTEMPTS = 3;
+            private static readonly int TWITCH_PINK_SCREEN_RETRY_DELAY = 15000; //ms
 
             #region Lists
                 private static List<string> _chansName = new List<string>();
@@ -146,11 +148,9 @@ namespace BluBotCore.Services
 
             string twitterTag = FindTwitterTag(e.Stream.Channel.DisplayName);
 
-            //await TweetMessageAsync($"{e.Stream.Channel.DisplayName} is live playing {e.Stream.Game}! {e.Stream.Channel.Url} {twitterTag}#WYKTV", e.Stream.Preview.Medium + Guid.NewGuid().ToString(), e.Stream.Channel.Name.ToLower());
+            string twitterURL = await TweetMessageAsync($"{e.Stream.Channel.DisplayName} is live playing {e.Stream.Game}! {e.Stream.Channel.Url} {twitterTag}#WYKTV", e.Stream.Preview.Medium + Guid.NewGuid().ToString(), e.Stream.Channel.Name.ToLower());
 
-            await SetupEmbedMessageAsync(eb, e, null, _twitterURL);
-
-            _twitterURL = "";
+            await SetupEmbedMessageAsync(eb, e, null, twitterURL);
         }
 
         private async void _monitor_OnStreamUpdate(object sender, OnStreamUpdateArgs e)
@@ -217,7 +217,6 @@ namespace BluBotCore.Services
         private async void _monitor_OnStreamMonitorStarted(object sender, OnStreamMonitorStartedArgs e)
         {
             _onlineTime = DateTime.Now;
-            _twitterURL = "";
             string time = DateTime.Now.ToString("HH:MM:ss");
             Console.WriteLine($"{time} Monitor     Started");
             _liveEmbeds.Clear();
@@ -365,22 +364,45 @@ namespace BluBotCore.Services
         }
 
 
-        private async Task TweetMessageAsync(string text, string url, string channel)
+        private async Task<String> TweetMessageAsync(string text, string url, string channel)
         {
             try
             {
                 WebClient webClient = new WebClient();
                 byte[] image = webClient.DownloadData(url);
+
+                for (int i = 0; i < TWITCH_PINK_SCREEN_RETRY_ATTEMPTS; i++)
+                {
+                    byte[] hash;
+                    using (var sha256 = System.Security.Cryptography.SHA256.Create())
+                    {
+                        hash = sha256.ComputeHash(image);
+                    }
+                    if (hash.SequenceEqual(TWITCH_PINK_SCREEN_CHECKSUM))
+                    {
+                        //pink screen detected. Lets sleep for X seconds and try again. 
+                        Console.WriteLine($"{DateTime.Now.ToString("HH:MM:ss")} Twitter     Detected Pink Screen for {url}, trying again in {TWITCH_PINK_SCREEN_RETRY_DELAY}, attempt {i+1} out of {TWITCH_PINK_SCREEN_RETRY_ATTEMPTS}" );
+                        await Task.Delay(TWITCH_PINK_SCREEN_RETRY_DELAY);
+                        image = webClient.DownloadData(url);
+                    } else
+                    {
+                        //not a pink screen. Break out of loop
+                        break;
+                    }
+                }
+
                 var publishOptions = new PublishTweetOptionalParameters();
                 publishOptions.MediaBinaries.Add(image);
                 var twitterObject = await TweetAsync.PublishTweet(text, publishOptions);
-                _twitterURL = twitterObject.Url;
+                return twitterObject.Url;
 
             }
             catch (Exception ex)
             {
                 var mahsaap = _client.GetUser(Constants.Discord.Mahsaap) as IUser;
                 await mahsaap.SendMessageAsync(ex.Message + "\n" + ex.StackTrace);
+                //cannot return null - code checks for length > 1
+                return "";
             }
         }
 
