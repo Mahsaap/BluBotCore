@@ -30,9 +30,9 @@ namespace BluBotCore.Services
             private readonly IServiceProvider _service;
 
             private static DateTime _onlineTime;
-            private static readonly byte[] TWITCH_PINK_SCREEN_CHECKSUM = new byte[] { 11, 241, 144, 174, 218, 192, 175, 31, 120, 108, 52, 36, 55, 174, 200, 134, 12, 8, 223, 245, 175, 184, 76, 16, 140, 201, 39, 57, 123, 39, 23, 78 };
-            private static readonly int TWITCH_PINK_SCREEN_RETRY_ATTEMPTS = 3;
-            private static readonly int TWITCH_PINK_SCREEN_RETRY_DELAY = 15000; //ms
+            private static readonly byte[] TwitchPinkScreenChecksum = new byte[] { 11, 241, 144, 174, 218, 192, 175, 31, 120, 108, 52, 36, 55, 174, 200, 134, 12, 8, 223, 245, 175, 184, 76, 16, 140, 201, 39, 57, 123, 39, 23, 78 };
+            private static readonly int TwitchPinkScreenRetryAttempts = 3;
+            private static readonly int TwitchPinkScreenRetryDelay = 15000; //ms
 
             private static List<string> _chansName = new List<string>();
             private static List<string> _chansID = new List<string>();
@@ -367,18 +367,18 @@ namespace BluBotCore.Services
                 WebClient webClient = new WebClient();
                 byte[] image = webClient.DownloadData(url);
 
-                for (int i = 0; i < TWITCH_PINK_SCREEN_RETRY_ATTEMPTS; i++)
+                for (int i = 0; i < TwitchPinkScreenRetryAttempts; i++)
                 {
                     byte[] hash;
                     using (var sha256 = System.Security.Cryptography.SHA256.Create())
                     {
                         hash = sha256.ComputeHash(image);
                     }
-                    if (hash.SequenceEqual(TWITCH_PINK_SCREEN_CHECKSUM))
+                    if (hash.SequenceEqual(TwitchPinkScreenChecksum))
                     {
                         //pink screen detected. Lets sleep for X seconds and try again. 
-                        Console.WriteLine($"{DateTime.Now.ToString("HH:MM:ss")} Twitter     Detected Pink Screen for {url}, trying again in {TWITCH_PINK_SCREEN_RETRY_DELAY}, attempt {i+1} out of {TWITCH_PINK_SCREEN_RETRY_ATTEMPTS}" );
-                        await Task.Delay(TWITCH_PINK_SCREEN_RETRY_DELAY);
+                        Console.WriteLine($"{DateTime.Now.ToString("HH:MM:ss")} Twitter     Detected Pink Screen for {url}, trying again in {TwitchPinkScreenRetryDelay}, attempt {i+1} out of {TwitchPinkScreenRetryAttempts}" );
+                        await Task.Delay(TwitchPinkScreenRetryDelay);
                         image = webClient.DownloadData(url);
                     } else
                     {
