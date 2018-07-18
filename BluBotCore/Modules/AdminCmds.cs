@@ -24,7 +24,7 @@ namespace BluBotCore.Modules
         [Command("version")]
         public async Task VersionAsync()
         {
-            await ReplyAsync("V1.06");
+            await ReplyAsync("V1.07");
         }
 
         //End application - ConsoleApp
@@ -126,7 +126,7 @@ namespace BluBotCore.Modules
                 $"Discord.Net ({DiscordConfig.Version})\n" +
                 $"TwitchLib 2.1.4\n" +
                 $"StrawPollNet 1.0.2\n" +
-                $"SteamStoreQuery\n" +
+                $"SteamStoreQuery 1.0.4\n" +
                 $"TweetInvi 3.0.0";
                 x.IsInline = false;
             });
