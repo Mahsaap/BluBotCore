@@ -47,11 +47,7 @@ namespace BluBotCore.DiscordHandlers
             if (msg.Severity == LogSeverity.Error || msg.Severity == LogSeverity.Warning || msg.Severity == LogSeverity.Critical)
             {
                 string msge = msg.ToString();
-<<<<<<< HEAD:BluBotCore/DiscordHandlers/LogHandler.cs
-                if (msg.ToString().ToLower().Contains("unexpected close")) msge = msg.Message;
-=======
                 if (msg.Message != null && msg.Message.Contains("System.Exception: Unexpected close")) msge = msg.Message;
->>>>>>> dd753bc2f88d9f81eb7223c303dd62dbba82b574:BluBotCore/Handlers/LogHandler.cs
                 var mahsaap = _client.GetUser(88798728948809728) as IUser;
                 mahsaap.SendMessageAsync(msge);
             }
