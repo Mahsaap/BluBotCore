@@ -21,7 +21,7 @@ namespace BluBotCore.DiscordHandlers
             _client = client;
             _service = service;
 
-            _client.MessageReceived += _client_MessageReceived;
+            //_client.MessageReceived += _client_MessageReceived;
         }
 
         private async Task _client_MessageReceived(SocketMessage message)
