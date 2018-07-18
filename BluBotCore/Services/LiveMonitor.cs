@@ -111,7 +111,7 @@ namespace BluBotCore.Services
                     }
                 }
 
-                Monitor = new LiveStreamMonitor(API, 120, invokeEventsOnStart: false);
+                Monitor = new LiveStreamMonitor(API, 300, invokeEventsOnStart: false);
 
                 Console.WriteLine($"{time} Monitor     Instance Created");
 
