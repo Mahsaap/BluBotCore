@@ -37,12 +37,12 @@ namespace BluBotCore.Services
             private static List<string> _chansName = new List<string>();
             private static List<string> _chansID = new List<string>();
 
-            private static ConcurrentDictionary<string, Tuple<RestUserMessage, string, string>> _sepliveEmbeds = new ConcurrentDictionary<string, Tuple<RestUserMessage, string, string>>();
+            //private static ConcurrentDictionary<string, Tuple<RestUserMessage, string, string>> _sepliveEmbeds = new ConcurrentDictionary<string, Tuple<RestUserMessage, string, string>>();
             private static ConcurrentDictionary<string, Tuple<RestUserMessage,string,string>> _liveEmbeds = new ConcurrentDictionary<string, Tuple<RestUserMessage,string,string>>();
         #endregion
 
         #region Public Variables
-        public static Dictionary<string, ulong> sepServerList = new Dictionary<string, ulong>();
+        //public static Dictionary<string, ulong> sepServerList = new Dictionary<string, ulong>();
         #endregion
 
         #region Properties
@@ -163,8 +163,8 @@ namespace BluBotCore.Services
                             e.Stream.Preview.Medium + Guid.NewGuid().ToString(), e.Stream.Channel.Logo, @"https://www.twitch.tv/" + e.Stream.Channel.Name);
 
                         await UpdateNotificationAsync(eb, _liveEmbeds, e);
-                        await Task.Delay(500);
-                        await UpdateNotificationAsync(eb, _sepliveEmbeds, e);
+                        //await Task.Delay(500);
+                        //await UpdateNotificationAsync(eb, _sepliveEmbeds, e);
 
                         string time = DateTime.Now.ToString("HH:MM:ss");
                         Console.WriteLine($"{time} Monitor     Stream {e.Channel} updated");
@@ -189,7 +189,7 @@ namespace BluBotCore.Services
             Console.WriteLine($"{time} Monitor     {e.Channel} is offline");
 
             await StreamOfflineAsync(_liveEmbeds, e, 250);
-            await StreamOfflineAsync(_sepliveEmbeds, e, 500);
+            //await StreamOfflineAsync(_sepliveEmbeds, e, 500);
 
         }
 
@@ -216,7 +216,7 @@ namespace BluBotCore.Services
             string time = DateTime.Now.ToString("HH:MM:ss");
             Console.WriteLine($"{time} Monitor     Started");
             _liveEmbeds.Clear();
-            _sepliveEmbeds.Clear();
+            //_sepliveEmbeds.Clear();
 
             if (_client.ConnectionState == ConnectionState.Connected)
             {
@@ -226,12 +226,12 @@ namespace BluBotCore.Services
                 var messages = await chan.GetMessagesAsync().FlattenAsync();
                 if (messages.Count() != 0) await chan.DeleteMessagesAsync(messages);
 
-                foreach (var sepServer in sepServerList)
-                {
-                    var sepChan = _client.GetChannel(sepServer.Value) as SocketTextChannel;
-                    var sapMes = await sepChan.GetMessagesAsync().FlattenAsync();
-                    if (sapMes.Count() != 0) await sepChan.DeleteMessagesAsync(sapMes);
-                }
+                //foreach (var sepServer in sepServerList)
+                //{
+                //    var sepChan = _client.GetChannel(sepServer.Value) as SocketTextChannel;
+                //    var sapMes = await sepChan.GetMessagesAsync().FlattenAsync();
+                //    if (sapMes.Count() != 0) await sepChan.DeleteMessagesAsync(sapMes);
+                //}
 
                 foreach (var x in Monitor.CurrentLiveStreams)
                 {
@@ -343,11 +343,11 @@ namespace BluBotCore.Services
 
                 await SendEmbedAsync(Setup.DiscordAnnounceChannel, eb, _liveEmbeds, here, channelID, channelName, status, game);
 
-                if (sepServerList.ContainsKey(channelName.ToLower()))
-                {
-                    await Task.Delay(500);
-                    await SendEmbedAsync(sepServerList[channelName.ToLower()], eb, _sepliveEmbeds, here, channelID, channelName, status, game);
-                }
+                //if (sepServerList.ContainsKey(channelName.ToLower()))
+                //{
+                //    await Task.Delay(500);
+                //    await SendEmbedAsync(sepServerList[channelName.ToLower()], eb, _sepliveEmbeds, here, channelID, channelName, status, game);
+                //}
             }
         }
 
