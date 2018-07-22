@@ -15,8 +15,8 @@ using Tweetinvi;
 using Tweetinvi.Parameters;
 using TwitchLib.Api;
 using TwitchLib.Api.Exceptions;
-using TwitchLib.Api.Models.v5.Teams;
 using TwitchLib.Api.Models.v5.Channels;
+using TwitchLib.Api.Models.v5.Teams;
 using TwitchLib.Api.Services;
 using TwitchLib.Api.Services.Events.LiveStreamMonitor;
 
@@ -30,23 +30,19 @@ namespace BluBotCore.Services
             private readonly IServiceProvider _service;
 
             private static DateTime _onlineTime;
-            private static readonly byte[] TWITCH_PINK_SCREEN_CHECKSUM = new byte[] { 11, 241, 144, 174, 218, 192, 175, 31, 120, 108, 52, 36, 55, 174, 200, 134, 12, 8, 223, 245, 175, 184, 76, 16, 140, 201, 39, 57, 123, 39, 23, 78 };
-            private static readonly int TWITCH_PINK_SCREEN_RETRY_ATTEMPTS = 3;
-            private static readonly int TWITCH_PINK_SCREEN_RETRY_DELAY = 15000; //ms
+            private static readonly byte[] TwitchPinkScreenChecksum = new byte[] { 11, 241, 144, 174, 218, 192, 175, 31, 120, 108, 52, 36, 55, 174, 200, 134, 12, 8, 223, 245, 175, 184, 76, 16, 140, 201, 39, 57, 123, 39, 23, 78 };
+            private static readonly int TwitchPinkScreenRetryAttempts = 3;
+            private static readonly int TwitchPinkScreenRetryDelay = 15000; //ms
 
-            #region Lists
-                private static List<string> _chansName = new List<string>();
-                private static List<string> _chansID = new List<string>();
-            #endregion
+            private static List<string> _chansName = new List<string>();
+            private static List<string> _chansID = new List<string>();
 
-            #region Dictionaries
-                private static ConcurrentDictionary<string, Tuple<RestUserMessage, string, string>> _sepliveEmbeds = new ConcurrentDictionary<string, Tuple<RestUserMessage, string, string>>();
-                private static ConcurrentDictionary<string, Tuple<RestUserMessage,string,string>> _liveEmbeds = new ConcurrentDictionary<string, Tuple<RestUserMessage,string,string>>();
-        #endregion
+            //private static ConcurrentDictionary<string, Tuple<RestUserMessage, string, string>> _sepliveEmbeds = new ConcurrentDictionary<string, Tuple<RestUserMessage, string, string>>();
+            private static ConcurrentDictionary<string, Tuple<RestUserMessage,string,string>> _liveEmbeds = new ConcurrentDictionary<string, Tuple<RestUserMessage,string,string>>();
         #endregion
 
         #region Public Variables
-        public static Dictionary<string, ulong> sepServerList = new Dictionary<string, ulong>();
+        //public static Dictionary<string, ulong> sepServerList = new Dictionary<string, ulong>();
         #endregion
 
         #region Properties
@@ -115,17 +111,17 @@ namespace BluBotCore.Services
                     }
                 }
 
-                Monitor = new LiveStreamMonitor(API, 120, invokeEventsOnStart: false);
+                Monitor = new LiveStreamMonitor(API, 300, invokeEventsOnStart: false);
 
                 Console.WriteLine($"{time} Monitor     Instance Created");
 
                 await SetCastersAsync();
 
-                Monitor.OnStreamOnline += _monitor_OnStreamOnline;
-                Monitor.OnStreamMonitorStarted += _monitor_OnStreamMonitorStarted;
-                Monitor.OnStreamsSet += _monitor_OnStreamsSet;
-                Monitor.OnStreamOffline += _monitor_OnStreamOffline;
-                Monitor.OnStreamUpdate += _monitor_OnStreamUpdate;
+                Monitor.OnStreamOnline += Monitor_OnStreamOnline;
+                Monitor.OnStreamMonitorStarted += Monitor_OnStreamMonitorStarted;
+                Monitor.OnStreamsSet += Monitor_OnStreamsSet;
+                Monitor.OnStreamOffline += Monitor_OnStreamOffline;
+                Monitor.OnStreamUpdate += Monitor_OnStreamUpdate;
 
                 Monitor.StartService(); //Keep at the end!
 
@@ -137,7 +133,7 @@ namespace BluBotCore.Services
             }
         }
 
-        private async void _monitor_OnStreamOnline(object sender, OnStreamOnlineArgs e)
+        private async void Monitor_OnStreamOnline(object sender, OnStreamOnlineArgs e)
         {
             string url = @"https://www.twitch.tv/" + e.Stream.Channel.Name;
             EmbedBuilder eb = SetupLiveEmbed($":link: {e.Stream.Channel.DisplayName}", $"{e.Stream.Channel.Status}", $"{e.Stream.Channel.Game}",
@@ -153,7 +149,7 @@ namespace BluBotCore.Services
             await SetupEmbedMessageAsync(eb, e, null, twitterURL);
         }
 
-        private async void _monitor_OnStreamUpdate(object sender, OnStreamUpdateArgs e)
+        private async void Monitor_OnStreamUpdate(object sender, OnStreamUpdateArgs e)
         {
             if (_liveEmbeds.ContainsKey(e.ChannelId))
             {
@@ -167,8 +163,8 @@ namespace BluBotCore.Services
                             e.Stream.Preview.Medium + Guid.NewGuid().ToString(), e.Stream.Channel.Logo, @"https://www.twitch.tv/" + e.Stream.Channel.Name);
 
                         await UpdateNotificationAsync(eb, _liveEmbeds, e);
-                        await Task.Delay(500);
-                        await UpdateNotificationAsync(eb, _sepliveEmbeds, e);
+                        //await Task.Delay(500);
+                        //await UpdateNotificationAsync(eb, _sepliveEmbeds, e);
 
                         string time = DateTime.Now.ToString("HH:MM:ss");
                         Console.WriteLine($"{time} Monitor     Stream {e.Channel} updated");
@@ -187,13 +183,13 @@ namespace BluBotCore.Services
             }
         }
 
-        private async void _monitor_OnStreamOffline(object sender, OnStreamOfflineArgs e)
+        private async void Monitor_OnStreamOffline(object sender, OnStreamOfflineArgs e)
         {
             string time = DateTime.Now.ToString("HH:MM:ss");
             Console.WriteLine($"{time} Monitor     {e.Channel} is offline");
 
             await StreamOfflineAsync(_liveEmbeds, e, 250);
-            await StreamOfflineAsync(_sepliveEmbeds, e, 500);
+            //await StreamOfflineAsync(_sepliveEmbeds, e, 500);
 
         }
 
@@ -208,19 +204,19 @@ namespace BluBotCore.Services
             }
         }
 
-        private void _monitor_OnStreamsSet(object sender, OnStreamsSetArgs e)
+        private void Monitor_OnStreamsSet(object sender, OnStreamsSetArgs e)
         {
             string time = DateTime.Now.ToString("HH:MM:ss");
             Console.WriteLine($"{time} Monitor     Streams Set!");
         }
 
-        private async void _monitor_OnStreamMonitorStarted(object sender, OnStreamMonitorStartedArgs e)
+        private async void Monitor_OnStreamMonitorStarted(object sender, OnStreamMonitorStartedArgs e)
         {
             _onlineTime = DateTime.Now;
             string time = DateTime.Now.ToString("HH:MM:ss");
             Console.WriteLine($"{time} Monitor     Started");
             _liveEmbeds.Clear();
-            _sepliveEmbeds.Clear();
+            //_sepliveEmbeds.Clear();
 
             if (_client.ConnectionState == ConnectionState.Connected)
             {
@@ -230,12 +226,12 @@ namespace BluBotCore.Services
                 var messages = await chan.GetMessagesAsync().FlattenAsync();
                 if (messages.Count() != 0) await chan.DeleteMessagesAsync(messages);
 
-                foreach (var sepServer in sepServerList)
-                {
-                    var sepChan = _client.GetChannel(sepServer.Value) as SocketTextChannel;
-                    var sapMes = await sepChan.GetMessagesAsync().FlattenAsync();
-                    if (sapMes.Count() != 0) await sepChan.DeleteMessagesAsync(sapMes);
-                }
+                //foreach (var sepServer in sepServerList)
+                //{
+                //    var sepChan = _client.GetChannel(sepServer.Value) as SocketTextChannel;
+                //    var sapMes = await sepChan.GetMessagesAsync().FlattenAsync();
+                //    if (sapMes.Count() != 0) await sepChan.DeleteMessagesAsync(sapMes);
+                //}
 
                 foreach (var x in Monitor.CurrentLiveStreams)
                 {
@@ -282,23 +278,23 @@ namespace BluBotCore.Services
 
         public async Task SetCastersAsync()
         {
-            //Team team = await API.Teams.v5.GetTeamAsync("wyktv");
+            Team team = await API.Teams.v5.GetTeamAsync("wyktv");
 
-            //foreach (Channel user in team.Users)
-            //{
-            //    _chansName.Add(user.Name);
-            //    _chansID.Add(user.Id);
-            //}
-            //Monitor.SetStreamsByUserId(_chansID);
+            foreach (Channel user in team.Users)
+            {
+                _chansName.Add(user.Name);
+                _chansID.Add(user.Id);
+            }
+            Monitor.SetStreamsByUserId(_chansID);
 
 
             //Testing
-            List<string> testList = new List<string>() { "mahsaap" };
-            var user = await API.Users.v5.GetUserByNameAsync("mahsaap");
-            var testUser = await API.Channels.v5.GetChannelByIDAsync(user.Matches[0].Id);
-            _chansID.Add(testUser.Id);
-            _chansName.Add(testUser.Name);
-            Monitor.SetStreamsByUserId(_chansID);
+            //List<string> testList = new List<string>() { "mahsaap" };
+            //var user = await API.Users.v5.GetUserByNameAsync("mahsaap");
+            //var testUser = await API.Channels.v5.GetChannelByIDAsync(user.Matches[0].Id);
+            //_chansID.Add(testUser.Id);
+            //_chansName.Add(testUser.Name);
+            //Monitor.SetStreamsByUserId(_chansID);
         }
 
         public async Task UpdateMonitorAsync()
@@ -347,11 +343,11 @@ namespace BluBotCore.Services
 
                 await SendEmbedAsync(Setup.DiscordAnnounceChannel, eb, _liveEmbeds, here, channelID, channelName, status, game);
 
-                if (sepServerList.ContainsKey(channelName.ToLower()))
-                {
-                    await Task.Delay(500);
-                    await SendEmbedAsync(sepServerList[channelName.ToLower()], eb, _sepliveEmbeds, here, channelID, channelName, status, game);
-                }
+                //if (sepServerList.ContainsKey(channelName.ToLower()))
+                //{
+                //    await Task.Delay(500);
+                //    await SendEmbedAsync(sepServerList[channelName.ToLower()], eb, _sepliveEmbeds, here, channelID, channelName, status, game);
+                //}
             }
         }
 
@@ -371,18 +367,18 @@ namespace BluBotCore.Services
                 WebClient webClient = new WebClient();
                 byte[] image = webClient.DownloadData(url);
 
-                for (int i = 0; i < TWITCH_PINK_SCREEN_RETRY_ATTEMPTS; i++)
+                for (int i = 0; i < TwitchPinkScreenRetryAttempts; i++)
                 {
                     byte[] hash;
                     using (var sha256 = System.Security.Cryptography.SHA256.Create())
                     {
                         hash = sha256.ComputeHash(image);
                     }
-                    if (hash.SequenceEqual(TWITCH_PINK_SCREEN_CHECKSUM))
+                    if (hash.SequenceEqual(TwitchPinkScreenChecksum))
                     {
                         //pink screen detected. Lets sleep for X seconds and try again. 
-                        Console.WriteLine($"{DateTime.Now.ToString("HH:MM:ss")} Twitter     Detected Pink Screen for {url}, trying again in {TWITCH_PINK_SCREEN_RETRY_DELAY}, attempt {i+1} out of {TWITCH_PINK_SCREEN_RETRY_ATTEMPTS}" );
-                        await Task.Delay(TWITCH_PINK_SCREEN_RETRY_DELAY);
+                        Console.WriteLine($"{DateTime.Now.ToString("HH:MM:ss")} Twitter     Detected Pink Screen for {url}, trying again in {TwitchPinkScreenRetryDelay}, attempt {i+1} out of {TwitchPinkScreenRetryAttempts}" );
+                        await Task.Delay(TwitchPinkScreenRetryDelay);
                         image = webClient.DownloadData(url);
                     } else
                     {

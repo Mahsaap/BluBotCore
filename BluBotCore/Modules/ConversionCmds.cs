@@ -1,10 +1,7 @@
-﻿using Discord;
-using Discord.Addons.Interactive;
+﻿using Discord.Addons.Interactive;
 using Discord.Commands;
-using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,7 +11,7 @@ namespace BluBotCore.Modules
     public class ConversionCmds : InteractiveBase<SocketCommandContext>
     {
         [Command("text")]
-        [Alias("ascii")]
+        [Alias("ascii,txt")]
         [Summary("Convert Binary to Text(Ascii)")]
         public async Task BinaryToTxtAsync([Remainder]string binary)
         {
@@ -37,7 +34,6 @@ namespace BluBotCore.Modules
         }
 
         [Command("binary")]
-        [Alias("txt")]
         [Summary("Convert Text(Ascii) to Binary")]
         public async Task TxtToBinaryAsync([Remainder]string text)
         {

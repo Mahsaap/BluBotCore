@@ -1,4 +1,4 @@
-﻿using BluBotCore.Handlers;
+﻿using BluBotCore.DiscordHandlers;
 using BluBotCore.Other;
 using Discord;
 using Discord.Commands;
@@ -41,10 +41,9 @@ namespace BluBotCore.Modules
         }
 
         [Command("egg")]
-        public async Task EggAsync()
+        public void EggAsync()
         {
             EasterEggs.easterEggEnable = !EasterEggs.easterEggEnable;
-            await Task.CompletedTask;
         }
 
         [Command("encrypt")]

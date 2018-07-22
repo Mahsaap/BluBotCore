@@ -6,7 +6,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BluBotCore.Handlers
+namespace BluBotCore.DiscordHandlers
 {
     public class ClientHandler
     {
@@ -17,10 +17,10 @@ namespace BluBotCore.Handlers
             _client = client;
             _service = service;
 
-            _client.Ready += _client_Ready;
+            _client.Ready += Client_Ready;
         }
 
-        private async Task _client_Ready()
+        private async Task Client_Ready()
         {
             LoadCustomCmdFile();
             await _client.SetStatusAsync(UserStatus.Online);

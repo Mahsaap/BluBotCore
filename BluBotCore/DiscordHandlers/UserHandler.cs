@@ -3,7 +3,7 @@ using Discord.WebSocket;
 using System;
 using System.Threading.Tasks;
 
-namespace BluBotCore.Handlers
+namespace BluBotCore.DiscordHandlers
 {
     class UserHandler
     {
@@ -14,14 +14,14 @@ namespace BluBotCore.Handlers
             _client = client;
             _service = service;
 
-            _client.UserJoined += _client_UserJoined;
-            _client.UserLeft += _client_UserLeft;
-            _client.UserBanned += _client_UserBanned;
-            _client.UserUnbanned += _client_UserUnbanned;
+            _client.UserJoined += Client_UserJoined;
+            _client.UserLeft += Client_UserLeft;
+            _client.UserBanned += Client_UserBanned;
+            _client.UserUnbanned += Client_UserUnbanned;
             //_client.UserVoiceStateUpdated += _client_UserVoiceStateUpdated;
         }
 
-        private async Task _client_UserVoiceStateUpdated(SocketUser user, SocketVoiceState voiceBefore, SocketVoiceState voiceAfter)
+        private async Task Client_UserVoiceStateUpdated(SocketUser user, SocketVoiceState voiceBefore, SocketVoiceState voiceAfter)
         {
             if (Setup.DiscordLogChannel == 0) return;
             //Joined Voice Channel
@@ -66,7 +66,7 @@ namespace BluBotCore.Handlers
             }
         }
 
-        private async Task _client_UserUnbanned(SocketUser user, SocketGuild guild)
+        private async Task Client_UserUnbanned(SocketUser user, SocketGuild guild)
         {
             if (Setup.DiscordLogChannel == 0) return;
 
@@ -80,7 +80,7 @@ namespace BluBotCore.Handlers
             Console.WriteLine($"{time} Discord     {message}");
         }
 
-        private async Task _client_UserBanned(SocketUser user, SocketGuild guild)
+        private async Task Client_UserBanned(SocketUser user, SocketGuild guild)
         {
             if (Setup.DiscordLogChannel == 0) return;
 
@@ -94,7 +94,7 @@ namespace BluBotCore.Handlers
             Console.WriteLine($"{time} Discord     {message}");
         }
 
-        private async Task _client_UserLeft(SocketGuildUser guildUser)
+        private async Task Client_UserLeft(SocketGuildUser guildUser)
         {
             if (Setup.DiscordLogChannel == 0) return;
 
@@ -108,7 +108,7 @@ namespace BluBotCore.Handlers
             Console.WriteLine($"{time} Discord     {message}");
         }
 
-        private async Task _client_UserJoined(SocketGuildUser guildUser)
+        private async Task Client_UserJoined(SocketGuildUser guildUser)
         {
             if (Setup.DiscordLogChannel == 0) return;
 

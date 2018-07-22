@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace BluBotCore.Handlers
+namespace BluBotCore.DiscordHandlers
 {
     class EasterEggs
     {
@@ -21,7 +21,7 @@ namespace BluBotCore.Handlers
             _client = client;
             _service = service;
 
-            _client.MessageReceived += _client_MessageReceived;
+            //_client.MessageReceived += _client_MessageReceived;
         }
 
         private async Task _client_MessageReceived(SocketMessage message)
