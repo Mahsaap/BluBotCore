@@ -137,7 +137,7 @@ namespace BluBotCore.Services
         {
             string url = @"https://www.twitch.tv/" + e.Stream.Channel.Name;
             EmbedBuilder eb = SetupLiveEmbed($":link: {e.Stream.Channel.DisplayName}", $"{e.Stream.Channel.Status}", $"{e.Stream.Channel.Game}",
-                e.Stream.Preview.Medium + Guid.NewGuid().ToString(), e.Stream.Channel.Logo, url);
+                e.Stream.Preview.Medium + Guid.NewGuid(), e.Stream.Channel.Logo, url);
 
             string time = DateTime.Now.ToString("HH:MM:ss");
             Console.WriteLine($"{time} Monitor     {e.Stream.Channel.DisplayName} is live playing {e.Stream.Game}");
@@ -188,21 +188,30 @@ namespace BluBotCore.Services
             string time = DateTime.Now.ToString("HH:MM:ss");
             Console.WriteLine($"{time} Monitor     {e.Channel} is offline");
 
-            await StreamOfflineAsync(_liveEmbeds, e, 250);
+            //await StreamOfflineAsync(_liveEmbeds, e, 250);
             //await StreamOfflineAsync(_sepliveEmbeds, e, 500);
-
-        }
-
-        private async Task StreamOfflineAsync(ConcurrentDictionary<string, Tuple<RestUserMessage, string, string>> lst, OnStreamOfflineArgs e, int delay)
-        {
-            if (lst.ContainsKey(e.ChannelId))
+            if (_liveEmbeds.ContainsKey(e.ChannelId))
             {
-                await Task.Delay(delay);
-                RestUserMessage embed = lst[e.ChannelId].Item1;
-                await DeleteEmbed(embed);
-                lst.TryRemove(e.ChannelId, out Tuple<RestUserMessage, string, string> outResult);
+                await Task.Delay(250);
+                RestUserMessage embed = _liveEmbeds[e.ChannelId].Item1;
+                if (_client.ConnectionState == ConnectionState.Connected)
+                    await embed.DeleteAsync();
+                _liveEmbeds.TryRemove(e.ChannelId, out Tuple<RestUserMessage, string, string> outResult);
             }
+
         }
+
+        //Added above ^^
+        //private async Task StreamOfflineAsync(ConcurrentDictionary<string, Tuple<RestUserMessage, string, string>> lst, OnStreamOfflineArgs e, int delay)
+        //{
+        //    if (lst.ContainsKey(e.ChannelId))
+        //    {
+        //        await Task.Delay(delay);
+        //        RestUserMessage embed = lst[e.ChannelId].Item1;
+        //        await DeleteEmbed(embed);
+        //        lst.TryRemove(e.ChannelId, out Tuple<RestUserMessage, string, string> outResult);
+        //    }
+        //}
 
         private void Monitor_OnStreamsSet(object sender, OnStreamsSetArgs e)
         {
@@ -245,14 +254,20 @@ namespace BluBotCore.Services
             }
         }
 
-        private async Task DeleteEmbed(RestUserMessage msg)
-        {
-            if (_client.ConnectionState == ConnectionState.Connected)
-                await msg.DeleteAsync();
-        }
+        //private async Task DeleteEmbed(RestUserMessage msg)
+        //{
+        //    if (_client.ConnectionState == ConnectionState.Connected)
+        //        await msg.DeleteAsync();
+        //}
 
-        private EmbedBuilder SetupLiveEmbed(string title, string description, string value, string image, string thumbnail, string url)
+        private EmbedBuilder SetupLiveEmbed(string title, string description, string game, string image, string thumbnail, string url)
         {
+            var valueAlt = ".";
+            if (!String.IsNullOrEmpty(game))
+            {
+                valueAlt = game;
+            }
+
             EmbedBuilder eb = new EmbedBuilder()
             {
                 Color = new Discord.Color(51, 102, 153),
@@ -263,7 +278,7 @@ namespace BluBotCore.Services
             eb.AddField(x =>
             {
                 x.Name = $"Playing";
-                x.Value = value;
+                x.Value = valueAlt;
                 x.IsInline = false;
             });
             eb.WithImageUrl(image);
