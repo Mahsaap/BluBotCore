@@ -353,32 +353,17 @@ namespace BluBotCore.Services
         private async Task SetupEmbedMessageAsync(EmbedBuilder eb, TwitchLib.Api.V5.Models.Streams.StreamByUser e, TwitchLib.Api.V5.Models.Streams.Stream s, string _twitterURL)
         {
             if (s == null && e == null || eb == null) return;
-
-            string twitchURL = "";
-            string channelID = "";
-            string channelName = "";
-            string status = "";
-            string game = "";
-
+            TwitchLib.Api.V5.Models.Streams.StreamByUser ee = null;
             if (e != null)
             {
-                TwitchLib.Api.V5.Models.Streams.StreamByUser ee = await API.V5.Streams.GetStreamByUserAsync(e.Stream.Channel.Id);
-                twitchURL = ee.Stream.Channel.Url;
-                channelID = ee.Stream.Channel.Id;
-                channelName = ee.Stream.Channel.DisplayName; 
-                status = ee.Stream.Channel.Status;
-                game = ee.Stream.Channel.Game;
+                ee = await API.V5.Streams.GetStreamByUserAsync(e.Stream.Channel.Id);
             }
 
-            if (s != null)
-            {
-                twitchURL = s.Channel.Url;
-                channelID = s.Channel.Id;
-                channelName = s.Channel.DisplayName; 
-                status = s.Channel.Status;
-                game = s.Channel.Game;
-            }
-            
+            string twitchURL = ee?.Stream.Channel.Url ?? s?.Channel.Url;
+            string channelID = ee?.Stream.Channel.Id ?? s?.Channel.Id;
+            string channelName = ee?.Stream.Channel.DisplayName ?? s?.Channel.DisplayName;
+            string status = ee?.Stream.Channel.Status ?? s?.Channel.Status;
+            string game = ee?.Stream.Channel.Game ?? s?.Channel.Game;            
 
             if (Setup.DiscordAnnounceChannel == 0) return;
             if (_client.ConnectionState == ConnectionState.Connected)
