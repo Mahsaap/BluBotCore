@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,7 +23,7 @@ namespace BluBotCore.Modules
         [Command("version")]
         public async Task VersionAsync()
         {
-            await ReplyAsync("V1.08");
+            await ReplyAsync("V1.09");
         }
 
         //End application - ConsoleApp
@@ -33,7 +32,7 @@ namespace BluBotCore.Modules
         {
             await Context.Client.SetStatusAsync(UserStatus.Invisible);
             await Task.Delay(500);
-            await ReplyAsync($"**Shutting Down!**");
+            await ReplyAsync("**Shutting Down!**");
             Environment.Exit(1);
         }
 
@@ -42,8 +41,8 @@ namespace BluBotCore.Modules
         {
             Setup.DiscordWYKTVRole = role.Id;
             await ReplyAsync($"WYKTV role set as {role.Name} - ({role.Id})");
-            string filename = "setup.txt";
-            List<string> tempLst = new List<string>()
+            const string filename = "setup.txt";
+            var tempLst = new List<string>()
             {
                 Setup.DiscordAnnounceChannel.ToString(),
                 Setup.DiscordStaffRole.ToString(),
@@ -57,8 +56,8 @@ namespace BluBotCore.Modules
         {
             Setup.DiscordAnnounceChannel = chan.Id;
             await ReplyAsync($"Live Channel set as {chan.Name} - ({chan.Id})");
-            string filename = "setup.txt";
-            List<string> tempLst = new List<string>()
+            const string filename = "setup.txt";
+            var tempLst = new List<string>()
             {
                 Setup.DiscordAnnounceChannel.ToString(),
                 Setup.DiscordStaffRole.ToString(),
@@ -72,8 +71,8 @@ namespace BluBotCore.Modules
         {
             Setup.DiscordLogChannel = chan.Id;
             await ReplyAsync($"Log Channel set as {chan.Name} - ({chan.Id})");
-            string filename = "setup.txt";
-            List<string> tempLst = new List<string>()
+            const string filename = "setup.txt";
+            var tempLst = new List<string>()
             {
                 Setup.DiscordAnnounceChannel.ToString(),
                 Setup.DiscordStaffRole.ToString(),
@@ -88,8 +87,8 @@ namespace BluBotCore.Modules
         {
             Setup.DiscordLogChannel = 0;
             await ReplyAsync($"Log Channel has been disabled.");
-            string filename = "setup.txt";
-            List<string> tempLst = new List<string>()
+            const string filename = "setup.txt";
+            var tempLst = new List<string>()
             {
                 Setup.DiscordAnnounceChannel.ToString(),
                 Setup.DiscordStaffRole.ToString(),
@@ -104,15 +103,15 @@ namespace BluBotCore.Modules
         public async Task BotInfoAsync()
         {
             RestApplication application = await Context.Client.GetApplicationInfoAsync();
-            string guildsString = "";
-            foreach (SocketGuild g in Context.Client.Guilds) guildsString += $"{g.Name} (Channels: {g.Channels.Count} - Users: {g.Users.Count})\n";
-            guildsString += $"\nTotal (Channels: {Context.Client.Guilds.Sum(g => g.Channels.Count)} - Users: {Context.Client.Guilds.Sum(g => g.Users.Count)})";
-            Version version = Assembly.GetEntryAssembly().GetName().Version;
+            //string guildsString = "";
+            //foreach (SocketGuild g in Context.Client.Guilds) guildsString += $"{g.Name} (Channels: {g.Channels.Count} - Users: {g.Users.Count})\n";
+            //guildsString += $"\nTotal (Channels: {Context.Client.Guilds.Sum(g => g.Channels.Count)} - Users: {Context.Client.Guilds.Sum(g => g.Users.Count)})";
+            //Version version = Assembly.GetEntryAssembly().GetName().Version;
             EmbedBuilder eb = new EmbedBuilder()
             {
                 Color = new Discord.Color(51, 102, 153),
                 Title = "**__Bot Info__**",
-                Description = $""
+                Description = ""
             };
             eb.AddField(x =>
             {
@@ -121,31 +120,31 @@ namespace BluBotCore.Modules
             });
             eb.AddField(x =>
             {
-                x.Name = $"Libraries Used";
-                x.Value = $"" +
+                x.Name = "Libraries Used";
+                x.Value = "" +
                 $"Discord.Net ({DiscordConfig.Version})\n" +
-                $"TwitchLib 2.1.4\n" +
-                $"StrawPollNet 1.0.2\n" +
-                $"SteamStoreQuery 1.0.4\n" +
-                $"TweetInvi 3.0.0";
+                "TwitchLib 3.0.3\n" +
+                "StrawPollNet 1.0.2\n" +
+                "SteamStoreQuery 1.0.4\n" +
+                "TweetInvi 4.0.0";
                 x.IsInline = false;
             });
             eb.AddField(x =>
             {
                 x.Name = "Runtime";
-                x.Value = $"{ RuntimeInformation.FrameworkDescription} { RuntimeInformation.OSArchitecture}";
+                x.Value = $"{RuntimeInformation.FrameworkDescription} {RuntimeInformation.OSArchitecture}";
                 x.IsInline = false;
             });
             eb.AddField(x =>
             {
                 x.Name = "Stats";
-                x.Value = $"" +
-                $"Heap Size: { GetHeapSize()} MB\n" +
+                x.Value = "" +
+                $"Heap Size: {GetHeapSize()} MB\n" +
                 $"Latency: {Context.Client.Latency}ms\n";
                 x.IsInline = false;
             });
             string guildsStr = "";
-            foreach (var guild in Context.Client.Guilds)
+            foreach (SocketGuild guild in Context.Client.Guilds)
             {
                 guildsStr += $"{guild.Name} ({guild.Id}) > Member Count = {guild.MemberCount}\n";
             }
@@ -172,7 +171,7 @@ namespace BluBotCore.Modules
                 try
                 {
                     var messages = Context.Channel.GetCachedMessages(num + 1);
-                    var chan = Context.Channel as ITextChannel;
+                    ITextChannel chan = Context.Channel as ITextChannel;
                     await chan.DeleteMessagesAsync(messages);
                     await ReplyAsync($"{Context.User} has purged {messages.Count} messages!");
                     if (messages.Count < num)
@@ -197,7 +196,7 @@ namespace BluBotCore.Modules
         [Summary("Change bot nickname.")]
         public async Task BotNickAsync([Remainder]string name)
         {
-            var guild = Context.Guild as IGuild;
+            IGuild guild = Context.Guild;
             IGuildUser self = await guild.GetCurrentUserAsync();
             await self.ModifyAsync(x => x.Nickname = name);
             await ReplyAsync($"Changed my nickname to `{name}`");
@@ -209,8 +208,8 @@ namespace BluBotCore.Modules
         [Summary("Change a users nickname.")]
         public async Task UserNickAsync(IUser user, [Remainder]string name)
         {
-            var guild = Context.Guild as IGuild;
-            var usr = user as IGuildUser;
+            //IGuild guild = Context.Guild;
+            IGuildUser usr = user as IGuildUser;
             await usr.ModifyAsync(x => x.Nickname = name);
             await ReplyAsync($"Changed {usr.Username}'s nickname to {name}");
         }
@@ -247,7 +246,7 @@ namespace BluBotCore.Modules
         [Command("listroles"), Summary("Roles or users with specified role")]
         public async Task ListRoleAsync([Remainder]IRole irole = null)
         {
-            var guild = Context.Guild as SocketGuild;
+            SocketGuild guild = Context.Guild;
             StringBuilder strB = new StringBuilder();
 
             //no role specified - list all roles in the guild
@@ -257,7 +256,7 @@ namespace BluBotCore.Modules
                 strB.AppendLine(title);
                 SocketRole everyone = guild.EveryoneRole;
 
-                List<string> listGuildRoles = new List<string>();
+                var listGuildRoles = new List<string>();
 
                 foreach (IRole role in guild.Roles)
                 {
@@ -280,7 +279,7 @@ namespace BluBotCore.Modules
                 string title = $"{guild.Name} {irole.Name} List:";
                 strB.AppendLine(title);
 
-                List<Tuple<string, string>> listGuildUser = new List<Tuple<string, string>>();
+                var listGuildUser = new List<Tuple<string, string>>();
                 foreach (IGuildUser user in guild.Users)
                 {
                     var roleIds = user.RoleIds;
@@ -306,7 +305,7 @@ namespace BluBotCore.Modules
         [Command("multi"), Summary("Urls for multi streams.")]
         public async Task MultiCastAsync([Remainder]string casters = null)
         {
-            string[] casterList = casters.Split(' ');
+            var casterList = casters.Split(' ');
             string result = "";
             foreach (string cast in casterList)
             {
@@ -349,12 +348,12 @@ namespace BluBotCore.Modules
         [Command("serverinfo"), Alias("server", "guildinfo", "guild"), Summary("Guild info.")]
         public async Task ServerInfoAsync()
         {
-            var guild = Context.Guild as IGuild;
+            IGuild guild = Context.Guild;
             var users = await guild.GetUsersAsync();
             IGuildChannel defaultChan = await guild.GetChannelAsync(guild.DefaultChannelId);
             IGuildUser owner = await guild.GetOwnerAsync();
             await ReplyAsync(
-                $"Guild Info\n" +
+                "Guild Info\n" +
                 $"Name: {guild.Name}\n" +
                 $"Owner's ID: {guild.OwnerId} {owner.Username}#{owner.Discriminator}\n" +
                 $"Available: {guild.Available}\n" +
