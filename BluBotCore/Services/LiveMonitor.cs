@@ -29,7 +29,7 @@ namespace BluBotCore.Services
             private readonly CommandService _commands;
             private readonly IServiceProvider _service;
 
-            readonly static bool twitterEnabled = false;
+            readonly static bool twitterEnabled = true;
 
             private static DateTime _onlineTime;
             private static readonly byte[] TwitchPinkScreenChecksum = new byte[] { 11, 241, 144, 174, 218, 192, 175, 31, 120, 108, 52, 36, 55, 174, 200, 134, 12, 8, 223, 245, 175, 184, 76, 16, 140, 201, 39, 57, 123, 39, 23, 78 };
@@ -134,10 +134,10 @@ namespace BluBotCore.Services
 
         private void Monitor_OnStreamOnline(object sender, OnStreamOnlineArgs e)
         {
-            Task.Run(() => Monitor_OnStreamOnlineAsync(e));
+            Task.Run(() => Monitor_OnStreamOnlineAsync(e)).Wait();
             Task.Delay(1000);
         }
-        private async void Monitor_OnStreamOnlineAsync(OnStreamOnlineArgs e)
+        private async Task Monitor_OnStreamOnlineAsync(OnStreamOnlineArgs e)
         {
             try{
             var ee = await API.V5.Streams.GetStreamByUserAsync(e.Channel);
@@ -173,7 +173,7 @@ namespace BluBotCore.Services
             Task.Run(() => Monitor_OnStreamUpdateAsync(e));
             Task.Delay(1000);
         }
-        private async void Monitor_OnStreamUpdateAsync(OnStreamUpdateArgs e)
+        private async Task Monitor_OnStreamUpdateAsync(OnStreamUpdateArgs e)
         {
             try {
                 var ee = await API.V5.Streams.GetStreamByUserAsync(e.Channel);
@@ -213,13 +213,19 @@ namespace BluBotCore.Services
             }
         }
 
-        private async void Monitor_OnStreamOffline(object sender, OnStreamOfflineArgs e)
+        private void Monitor_OnStreamOffline(object sender, OnStreamOfflineArgs e)
         {
-            var ee = await API.V5.Streams.GetStreamByUserAsync(e.Channel);
+            Task.Run(() => Monitor_OnStreamOfflineAsync(e));
+            Task.Delay(1000);
+        }
+        private async void Monitor_OnStreamOfflineAsync(OnStreamOfflineArgs e)
+        {
+            //var ee = await API.V5.Streams.GetStreamByUserAsync(e.Stream.UserId);
+            var ee = await API.V5.Channels.GetChannelByIDAsync(e.Channel);
             string time = DateTime.Now.ToString("HH:MM:ss");
-            Console.WriteLine($"{time} Monitor     {ee.Stream.Channel.DisplayName} is offline");
+            Console.WriteLine($"{time} Monitor     {ee.DisplayName} is offline");
 
-            if (_liveEmbeds.ContainsKey(ee.Stream.Channel.Id))
+            if (_liveEmbeds.ContainsKey(e.Channel))
             {
                 await Task.Delay(250);
                 RestUserMessage embed = _liveEmbeds[e.Channel].Item1;

@@ -23,7 +23,7 @@ namespace BluBotCore.Modules
         [Command("version")]
         public async Task VersionAsync()
         {
-            await ReplyAsync("V1.09");
+            await ReplyAsync("V1.11");
         }
 
         //End application - ConsoleApp
