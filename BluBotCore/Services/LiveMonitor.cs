@@ -154,7 +154,7 @@ namespace BluBotCore.Services
 
                 string twitterURL = "";
                 if (twitterEnabled){
-                    twitterURL = await TweetMessageAsync($"{ee.Stream.Channel.DisplayName} is live playing {ee.Stream.Game}! {ee.Stream.Channel.Url} {twitterTag}#WYKTV", ee.Stream.Preview.Medium + Guid.NewGuid().ToString(), ee.Stream.Channel.Name.ToLower());
+                    twitterURL = await TweetMessageAsync($"{ee.Stream.Channel.DisplayName} is live playing {ee.Stream.Game}! {ee.Stream.Channel.Url} {twitterTag}#WYK", ee.Stream.Preview.Medium + Guid.NewGuid().ToString(), ee.Stream.Channel.Name.ToLower());
                 }
                 await Task.Delay(1000);
                 await SetupEmbedMessageAsync(eb, ee, null, twitterURL);
