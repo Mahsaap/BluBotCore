@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace BluBotCore.Modules
+namespace BluBotCore.Modules.Commands
 {
     [Name("Owner")]
     [RequireOwner]
@@ -43,7 +43,7 @@ namespace BluBotCore.Modules
         [Command("egg")]
         public void EggAsync()
         {
-            EasterEggs.easterEggEnable = !EasterEggs.easterEggEnable;
+            EasterEggsHandler.easterEggEnable = !EasterEggsHandler.easterEggEnable;
         }
 
         [Command("encrypt")]

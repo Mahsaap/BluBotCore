@@ -4,7 +4,7 @@ using System;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace BluBotCore.DiscordHandlers
+namespace BluBotCore.Handlers.Discord
 {
     public class CommandHandler
     {

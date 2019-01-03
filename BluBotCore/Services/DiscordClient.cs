@@ -1,4 +1,4 @@
-﻿using BluBotCore.DiscordHandlers;
+﻿using BluBotCore.Handlers.Discord;
 using BluBotCore.Other;
 using Discord;
 using Discord.Addons.Interactive;
@@ -220,8 +220,7 @@ namespace BluBotCore.Services
             .AddSingleton<LogHandler>()
             .AddSingleton<ClientHandler>()
             .AddSingleton<UserHandler>()
-            .AddSingleton<CustomCommands>()
-            .AddSingleton<EasterEggs>()
+            .AddSingleton<CustomCommandsHandler>()
             .AddSingleton<TwitterClient>()
             .AddSingleton<LiveMonitor>()
             .BuildServiceProvider();
@@ -233,8 +232,7 @@ namespace BluBotCore.Services
             service.GetRequiredService<LogHandler>();
             service.GetRequiredService<ClientHandler>();
             service.GetRequiredService<UserHandler>();
-            service.GetRequiredService<CustomCommands>();
-            service.GetRequiredService<EasterEggs>();
+            service.GetRequiredService<CustomCommandsHandler>();
             service.GetRequiredService<TwitterClient>();
             service.GetRequiredService<LiveMonitor>();
         }

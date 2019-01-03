@@ -13,7 +13,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BluBotCore.Modules
+namespace BluBotCore.Modules.Commands
 {
     [Name("Admin")]
     [RequireContext(ContextType.Guild)]
@@ -23,7 +23,7 @@ namespace BluBotCore.Modules
         [Command("version")]
         public async Task VersionAsync()
         {
-            await ReplyAsync("V1.11");
+            await ReplyAsync("V1.12");
         }
 
         //End application - ConsoleApp

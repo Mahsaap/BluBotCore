@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BluBotCore.DiscordHandlers
 {
-    class EasterEggs
+    class EasterEggsHandler
     {
         public static bool easterEggEnable = true;
         private Random rnd = new Random();
@@ -16,13 +16,13 @@ namespace BluBotCore.DiscordHandlers
 
         private List<ulong> eggChk = new List<ulong>();
 
-        public EasterEggs(IServiceProvider service, DiscordSocketClient client)
-        {
-            _client = client;
-            _service = service;
+        //public EasterEggsHandler(IServiceProvider service, DiscordSocketClient client)
+        //{
+        //    _client = client;
+        //    _service = service;
 
-            //_client.MessageReceived += _client_MessageReceived;
-        }
+        //    //_client.MessageReceived += _client_MessageReceived;
+        //}
 
         private async Task _client_MessageReceived(SocketMessage message)
         {
@@ -39,8 +39,8 @@ namespace BluBotCore.DiscordHandlers
                     switch (message.Author.Id)
                     {
                         //case 98944716304818176: //Crash // Triggered on May16 #General @ 8:53pm Atlantic Time
-                            //await SendMessage(chan, @"https://media.giphy.com/media/3o6ZtcaQX0Xa8FPLX2/giphy.gif", "Crash, we will never know!");
-                            //break;
+                        //await SendMessage(chan, @"https://media.giphy.com/media/3o6ZtcaQX0Xa8FPLX2/giphy.gif", "Crash, we will never know!");
+                        //break;
                         case 103600594459062272: //Brawli
                             await SendMessage(chan, @"https://media.giphy.com/media/3o6gDULDiTel9fUC8E/giphy.gif", "Brawli, the first man to have birthdays everyday!");
                             eggChk.Add(message.Author.Id);

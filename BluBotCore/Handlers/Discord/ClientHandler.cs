@@ -6,7 +6,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BluBotCore.DiscordHandlers
+namespace BluBotCore.Handlers.Discord
 {
     public class ClientHandler
     {
@@ -47,7 +47,7 @@ namespace BluBotCore.DiscordHandlers
                     }
                     file.Close();
                 }
-                CustomCommands.customCommands = tmpList;
+                CustomCommandsHandler.customCommands = tmpList;
                 Console.WriteLine($"{time} Setup       File {filename} loaded!");
             }
             else

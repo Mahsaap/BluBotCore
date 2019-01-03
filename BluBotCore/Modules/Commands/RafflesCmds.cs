@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace BluBotCore.Modules
+namespace BluBotCore.Modules.Commands
 {
     //BROKEN ATM
     //[Name("Raffle")]

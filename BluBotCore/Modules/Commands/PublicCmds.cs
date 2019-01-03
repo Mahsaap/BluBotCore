@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 
 
-namespace BluBotCore.Modules
+namespace BluBotCore.Modules.Commands
 {
     [Name("Public")]
     public class PublicCmds : ModuleBase<SocketCommandContext>

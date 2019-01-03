@@ -3,7 +3,7 @@ using Discord.Commands;
 using System.Threading.Tasks;
 using Tweetinvi;
 
-namespace BluBotCore.Modules
+namespace BluBotCore.Modules.Commands
 {
     [Name("Twitter")]
     [RequireContext(ContextType.Guild)]

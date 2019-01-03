@@ -4,7 +4,7 @@ using Discord.WebSocket;
 using System;
 using System.Threading.Tasks;
 
-namespace BluBotCore.DiscordHandlers
+namespace BluBotCore.Handlers.Discord
 {
     class LogHandler
     {

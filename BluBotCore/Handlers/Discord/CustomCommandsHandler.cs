@@ -9,9 +9,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BluBotCore.DiscordHandlers
+namespace BluBotCore.Handlers.Discord
 {
-    class CustomCommands
+    class CustomCommandsHandler
     {
         public static ConcurrentDictionary<string, string> customCommands = new ConcurrentDictionary<string, string>();
         public static string customCMDPrefix = "?";
@@ -19,7 +19,7 @@ namespace BluBotCore.DiscordHandlers
         private readonly DiscordSocketClient _client;
         private readonly IServiceProvider _service;
 
-        public CustomCommands(IServiceProvider service, DiscordSocketClient client)
+        public CustomCommandsHandler(IServiceProvider service, DiscordSocketClient client)
         {
             _client = client;
             _service = service;

@@ -4,7 +4,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using System.Threading.Tasks;
 
-namespace BluBotCore.Modules
+namespace BluBotCore.Modules.Commands
 {
     [Name("LiveMonitor")]
     [RequireContext(ContextType.Guild)]

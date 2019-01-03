@@ -7,7 +7,7 @@ using StrawPollNET.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace BluBotCore.Modules
+namespace BluBotCore.Modules.Commands
 {
     [Name("StrawPoll")]
     [RequireContext(ContextType.Guild)]
