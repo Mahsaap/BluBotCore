@@ -1,12 +1,11 @@
-﻿using BluBotCore.Other;
+﻿using BluBotCore.Constants;
+using BluBotCore.Other;
 using Discord;
-using Discord.Commands;
 using Discord.Rest;
 using Discord.WebSocket;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -26,15 +25,10 @@ namespace BluBotCore.Services
     {
         #region Private Variables
             private readonly DiscordSocketClient _client;
-            private readonly CommandService _commands;
-            private readonly IServiceProvider _service;
 
             readonly static bool twitterEnabled = true;
 
             private static DateTime _onlineTime;
-            private static readonly byte[] TwitchPinkScreenChecksum = new byte[] { 11, 241, 144, 174, 218, 192, 175, 31, 120, 108, 52, 36, 55, 174, 200, 134, 12, 8, 223, 245, 175, 184, 76, 16, 140, 201, 39, 57, 123, 39, 23, 78 };
-            private static readonly int TwitchPinkScreenRetryAttempts = 3;
-            private static readonly int TwitchPinkScreenRetryDelay = 15000; //ms
 
             private static List<string> _chansName = new List<string>();
             private static List<string> _chansID = new List<string>();
@@ -50,11 +44,9 @@ namespace BluBotCore.Services
         public List<String> ChansID { get => _chansID; }
         #endregion
 
-        public LiveMonitor(IServiceProvider service, DiscordSocketClient client, CommandService commands)
+        public LiveMonitor(DiscordSocketClient client)
         {
             _client = client;
-            _service = service;
-            _commands = commands;
 
             Task.Run(() => ConfigLiveMonitorAsync());
         }
@@ -380,11 +372,11 @@ namespace BluBotCore.Services
                 here += $"\nTwitch (*{twitchURL}*)";
                 here = here.Insert(0, $"**{channelName} is live!** ");
 
-                await SendEmbedAsync(Setup.DiscordAnnounceChannel, eb, here, channelID, channelName, status, game);
+                await SendEmbedAsync(Setup.DiscordAnnounceChannel, eb, here, channelID, status, game);
             }
         }
 
-        private async Task SendEmbedAsync(ulong id, EmbedBuilder eb, string here, string channelID, string channelName, string status, string game)
+        private async Task SendEmbedAsync(ulong id, EmbedBuilder eb, string here, string channelID, string status, string game)
         {
             var chan = _client.GetChannel(id) as SocketTextChannel;
             RestUserMessage msg = await chan.SendMessageAsync(here, embed: eb.Build());
@@ -401,18 +393,18 @@ namespace BluBotCore.Services
                 WebClient webClient = new WebClient();
                 byte[] image = webClient.DownloadData(url);
 
-                for (int i = 0; i < TwitchPinkScreenRetryAttempts; i++)
+                for (int i = 0; i < Twitch.TwitchPinkScreenRetryAttempts; i++)
                 {
                     byte[] hash;
                     using (var sha256 = System.Security.Cryptography.SHA256.Create())
                     {
                         hash = sha256.ComputeHash(image);
                     }
-                    if (hash.SequenceEqual(TwitchPinkScreenChecksum))
+                    if (hash.SequenceEqual(Twitch.TwitchPinkScreenChecksum))
                     {
                         //pink screen detected. Lets sleep for X seconds and try again. 
-                        Console.WriteLine($"{DateTime.Now.ToString("HH:MM:ss")} Twitter     Detected Pink Screen for {url}, trying again in {TwitchPinkScreenRetryDelay}, attempt {i+1} out of {TwitchPinkScreenRetryAttempts}" );
-                        await Task.Delay(TwitchPinkScreenRetryDelay);
+                        Console.WriteLine($"{DateTime.Now.ToString("HH:MM:ss")} Twitter     Detected Pink Screen for {url}, trying again in {Twitch.TwitchPinkScreenRetryDelay}, attempt {i+1} out of {Twitch.TwitchPinkScreenRetryAttempts}" );
+                        await Task.Delay(Twitch.TwitchPinkScreenRetryDelay);
                         image = webClient.DownloadData(url);
                     } else
                     {
@@ -435,9 +427,6 @@ namespace BluBotCore.Services
                 return "";
             }
         }
-
-        private static TimeSpan GetUptime()
-            => (DateTime.Now - Process.GetCurrentProcess().StartTime);
 
         private string FindTwitterTag(string channel)
         {

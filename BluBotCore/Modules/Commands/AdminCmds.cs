@@ -103,10 +103,7 @@ namespace BluBotCore.Modules.Commands
         public async Task BotInfoAsync()
         {
             RestApplication application = await Context.Client.GetApplicationInfoAsync();
-            //string guildsString = "";
-            //foreach (SocketGuild g in Context.Client.Guilds) guildsString += $"{g.Name} (Channels: {g.Channels.Count} - Users: {g.Users.Count})\n";
-            //guildsString += $"\nTotal (Channels: {Context.Client.Guilds.Sum(g => g.Channels.Count)} - Users: {Context.Client.Guilds.Sum(g => g.Users.Count)})";
-            //Version version = Assembly.GetEntryAssembly().GetName().Version;
+
             EmbedBuilder eb = new EmbedBuilder()
             {
                 Color = new Discord.Color(51, 102, 153),

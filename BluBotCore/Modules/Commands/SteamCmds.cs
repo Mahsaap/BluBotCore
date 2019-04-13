@@ -16,7 +16,6 @@ namespace BluBotCore.Modules.Commands
         [Summary("Search the steam store (!steam game).")]
         public async Task SteamQueryAsync([Remainder]string game)
         {
-            DateTime currentTime = DateTime.Now;
             game = game.Replace(' ', '_');
             try
             {
