@@ -24,26 +24,61 @@ namespace BluBotCore.Services
     public class LiveMonitor
     {
         #region Private Variables
+
+            /// <summary>
+            /// Discord Client instance
+            /// </summary>
             private readonly DiscordSocketClient _client;
 
+            /// <summary>
+            /// Debug Option - Toggle twitter tweets on/off
+            /// </summary>
             readonly static bool twitterEnabled = true;
 
-            private static DateTime _onlineTime;
+            /// <summary>
+            /// Time the bot comes online.
+            /// This is used to not tweet / @everyone current online streamers on load.
+            /// </summary>
+            private static DateTime _botOnlineTime;
+            
+            /// <summary>
+            /// Dictionary of the current team members of WYKTV being monitored.
+            /// </summary>
+            private static Dictionary<string,string> _monitoredChannels = new Dictionary<string, string>();
 
-            private static List<string> _chansName = new List<string>();
-            private static List<string> _chansID = new List<string>();
-
+            /// <summary>
+            /// Dictionary of all the live discord messages.
+            /// Concurrent since this can be added/removed from at anytime.
+            /// </summary>
             private static ConcurrentDictionary<string, Tuple<RestUserMessage,string,string>> _liveEmbeds = new ConcurrentDictionary<string, Tuple<RestUserMessage,string,string>>();
+
         #endregion
 
         #region Properties
 
-        public LiveStreamMonitorService Monitor { get; private set; }
-        public TwitchAPI API { get; private set; }
-        public List<String> ChansName { get => _chansName; }
-        public List<String> ChansID { get => _chansID; }
+            /// <summary>
+            /// Live Monitor Instance.
+            /// </summary>
+            public LiveStreamMonitorService Monitor { get; private set; }
+
+            /// <summary>
+            /// Twitch API Instance.
+            /// </summary>
+            public TwitchAPI API { get; private set; }
+
+            /// <summary>
+            /// Dictionary of all the current monitored channels.
+            /// </summary>
+            public Dictionary<String,String> MonitoredChannels { get => _monitoredChannels; }
+
         #endregion
 
+        /// <summary>
+        /// Constructor
+        /// Injects Dicord Client instance.
+        /// Starts Live Monitor configuration.
+        /// </summary>
+        /// <param name="client"></param>
         public LiveMonitor(DiscordSocketClient client)
         {
             _client = client;
@@ -51,10 +86,16 @@ namespace BluBotCore.Services
             Task.Run(() => ConfigLiveMonitorAsync());
         }
 
+        /// <summary>
+        /// Live Monitor configuration. 
+        /// </summary>
+        /// <returns></returns>
         private async Task ConfigLiveMonitorAsync()
         {
             var time = DateTime.Now.ToString("HH:MM:ss");
             Console.WriteLine($"{time} Monitor     Checking if Discord is connected!");
+
+            // Ensure Discord is connected before config continues. Loop every 2 seconds till online.
             while (_client.ConnectionState != ConnectionState.Connected)
             {
                 var timeWait = DateTime.Now.ToString("HH:MM:ss");
@@ -66,36 +107,48 @@ namespace BluBotCore.Services
                 API = new TwitchAPI();
                 try
                 {
+                    // Set Credentials in Twitch API Config.
                     API.Settings.ClientId = AES.Decrypt(Cred.TwitchAPIID);
                     API.Settings.AccessToken = AES.Decrypt(Cred.TwitchAPIToken);
                 }
                 catch (Exception ex)
                 {
+                    // Token Expired Refresh Sequence.
                     if (ex is TokenExpiredException)
                     {
-                        var mahsaap = _client.GetUser(Constants.Discord.Mahsaap) as IUser;
+                        var mahsaap = (_client.GetUser(Constants.Discord.Mahsaap) as IUser);
                         await mahsaap.SendMessageAsync("TwitchLib token has expired.");
+
+                        // Refresh Token
                         var token = await API.V5.Auth.RefreshAuthTokenAsync(
                             AES.Decrypt(Cred.TwitchAPIRefreshToken), AES.Decrypt(Cred.TwitchAPIToken), AES.Decrypt(Cred.TwitchAPIID));
                         await mahsaap.SendMessageAsync("TwitchLib token has been refreshed.");
-                        string dataOld;
+                        
+                        // Grab old credentials from file.
                         List<string> tmpList = new List<string>();
                         using (StreamReader file = new StreamReader("init.txt"))
                         {
+                            string dataOld;
                             while ((dataOld = file.ReadLine()) != null)
                                 tmpList.Add(dataOld);
                             file.Close();
                         }
+
+                        // Set new credentials to file.
                         tmpList[2] = AES.Encrypt(token.AccessToken);
                         Cred.TwitchAPIToken = AES.Encrypt(token.AccessToken);
                         tmpList[3] = AES.Encrypt(token.RefreshToken);
                         Cred.TwitchAPIRefreshToken = AES.Encrypt(token.RefreshToken);
+
+                        // Save (overwrite) the file.
                         File.WriteAllLines("init.txt", tmpList);
+
                         await mahsaap.SendMessageAsync($"TwitchLib keys have been updated in file. Expires in {token.ExpiresIn}.");
 
+                        // Set Credentials in Twitch API Config.
                         API.Settings.ClientId = AES.Decrypt(Cred.TwitchAPIID);
                         API.Settings.AccessToken = AES.Decrypt(Cred.TwitchAPIToken);
-                        Console.WriteLine($"{time} Monitor     Tokens have been refreshed,updated and started");
+                        Console.WriteLine($"{time} Monitor     Tokens have been refreshed and updated!");
 
                     }
                 }
@@ -106,15 +159,14 @@ namespace BluBotCore.Services
 
                 await SetCastersAsync();
 
+                // Events
                 Monitor.OnStreamOnline += Monitor_OnStreamOnline;
                 Monitor.OnStreamOffline += Monitor_OnStreamOffline;
                 Monitor.OnStreamUpdate += Monitor_OnStreamUpdate;
-
                 Monitor.OnServiceStarted += Monitor_OnServiceStarted;
                 Monitor.OnChannelsSet += Monitor_OnChannelsSet;
-
-
-                Monitor.Start(); //Keep at the end!
+                
+                Monitor.Start();
 
                 await Task.Delay(-1);
             }
@@ -212,7 +264,6 @@ namespace BluBotCore.Services
         }
         private async void Monitor_OnStreamOfflineAsync(OnStreamOfflineArgs e)
         {
-            //var ee = await API.V5.Streams.GetStreamByUserAsync(e.Stream.UserId);
             var ee = await API.V5.Channels.GetChannelByIDAsync(e.Channel);
             string time = DateTime.Now.ToString("HH:MM:ss");
             Console.WriteLine($"{time} Monitor     {ee.DisplayName} is offline");
@@ -237,7 +288,7 @@ namespace BluBotCore.Services
 
         private async void Monitor_OnServiceStarted(object sender, TwitchLib.Api.Services.Events.OnServiceStartedArgs e)
         {
-            _onlineTime = DateTime.Now;
+            _botOnlineTime = DateTime.Now;
             string time = DateTime.Now.ToString("HH:MM:ss");
             Console.WriteLine($"{time} Monitor     Started");
             _liveEmbeds.Clear();
@@ -322,27 +373,15 @@ namespace BluBotCore.Services
 
             foreach (Channel user in team.Users)
             {
-                _chansName.Add(user.Name);
-                _chansID.Add(user.Id);
+                _monitoredChannels.Add(user.DisplayName, user.Id);
             }
-            Monitor.SetChannelsById(_chansID);
-
-
-            //Testing
-
-            //List<string> testList = new List<string>() { "mahsaap" };
-            //var user = await API.Users.v5.GetUserByNameAsync("mahsaap");
-            //var testUser = await API.Channels.v5.GetChannelByIDAsync(user.Matches[0].Id);
-            //_chansID.Add(testUser.Id);
-            //_chansName.Add(testUser.Name);
-            //Monitor.SetStreamsByUserId(_chansID);
+            Monitor.SetChannelsById(_monitoredChannels.Values.ToList());
         }
 
         public async Task UpdateMonitorAsync()
         {
             Monitor.Stop();
-            _chansName.Clear();
-            _chansID.Clear();
+            _monitoredChannels.Clear();
             await SetCastersAsync();
             Monitor.Start();
         }
@@ -367,7 +406,7 @@ namespace BluBotCore.Services
             if (_client.ConnectionState == ConnectionState.Connected)
             {
                 string here = "";
-                if (_onlineTime.AddSeconds(30) <= DateTime.Now) here = "@here ";
+                if (_botOnlineTime.AddSeconds(30) <= DateTime.Now) here = "@here ";
                 if (_twitterURL.Length > 1) here += $"\nTwitter (*<{_twitterURL}>*)"; else here += " ";
                 here += $"\nTwitch (*{twitchURL}*)";
                 here = here.Insert(0, $"**{channelName} is live!** ");
