@@ -14,7 +14,7 @@ namespace BluBotCore.Modules.Commands
         private readonly CommandService _commands;
         private readonly IServiceProvider _map;
         //private List<string> ignoreList = new List<string>();
-        private List<string> hideList = new List<string>();
+        private readonly List<string> hideList = new List<string>();
 
         public HelpCmds(IServiceProvider map, CommandService commands)
         {
@@ -26,7 +26,6 @@ namespace BluBotCore.Modules.Commands
             hideList.Add("LiveMonitor");
             hideList.Add("Owner");
             hideList.Add("Help");
-            hideList.Add("Twitter");
         }
 
         [Command("help")]

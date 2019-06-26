@@ -17,7 +17,7 @@ namespace BluBotCore.Modules.Commands
         public class StrawPollGroup : InteractiveBase<SocketCommandContext>
         {
             private static CreatedPoll currentPoll;
-            private static List<CreatedPoll> pastPolls = new List<CreatedPoll>();
+            private static readonly List<CreatedPoll> pastPolls = new List<CreatedPoll>();
 
             [RequireRoleOrID]
             [Command("create", RunMode = RunMode.Async)]

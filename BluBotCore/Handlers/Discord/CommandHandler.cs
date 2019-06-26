@@ -33,11 +33,13 @@ namespace BluBotCore.Handlers.Discord
             if (!(message.HasCharPrefix('!', ref argPos) || message.HasMentionPrefix(_client.CurrentUser, ref argPos))) return;
             SocketCommandContext context = new SocketCommandContext(_client, message);
             IResult result = await _commands.ExecuteAsync(context, argPos, _service);
-            //if (!result.IsSuccess)
-            //{
-            //    if (result.ErrorReason == "Unknown command.") return;
-            //    await context.Channel.SendMessageAsync(result.ErrorReason);
-            //}
+            if (!result.IsSuccess)
+            {
+                if (result.ErrorReason == "Unknown command.") return;
+                //await context.Channel.SendMessageAsync(result.ErrorReason);
+                Console.WriteLine($"User:{context.User.Username}#{context.User.Discriminator}," +
+                    $"Id:{context.User.Id},Message:{context.Message.Content},Error:{result.ErrorReason}");
+            }
         }
     }
 }

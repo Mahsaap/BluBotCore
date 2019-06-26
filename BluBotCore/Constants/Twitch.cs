@@ -1,4 +1,4 @@
-﻿namespace BluBotCore.Constants
+﻿namespace BluBotCore
 {
     public class Twitch
     {

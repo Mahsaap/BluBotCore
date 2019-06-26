@@ -12,7 +12,7 @@ namespace BluBotCore.Modules.Commands
     [Name("Public")]
     public class PublicCmds : ModuleBase<SocketCommandContext>
     {
-        private Random rnd = new Random();
+        private readonly Random rnd = new Random();
 
         [Command("hug")]
         [Summary("Random Hug image or Hug a target.")]
@@ -61,7 +61,7 @@ namespace BluBotCore.Modules.Commands
         [Summary("Flip a coin.")]
         public async Task CoinFlipAsync()
         {
-            Coin choice = 0;
+            Coin choice;
             int r = rnd.Next(2);
             if (r == 0) choice = Coin.Heads;
             else choice = Coin.Tails;
@@ -77,9 +77,5 @@ namespace BluBotCore.Modules.Commands
                 @"<https://steamstat.us/>" + "\n" +
                 @"<https://twitchstatus.com/>");
         }
-
-        private static string GetUptime()
-            => (DateTime.Now - Process.GetCurrentProcess().StartTime).ToString(@"dd\.hh\:mm\:ss");
-        }
-
+    }
 }

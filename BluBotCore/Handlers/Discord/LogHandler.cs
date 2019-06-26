@@ -10,11 +10,10 @@ namespace BluBotCore.Handlers.Discord
     {
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commands;
-        private readonly IServiceProvider _service;
-        public LogHandler(IServiceProvider service, DiscordSocketClient client, CommandService commands)
+
+        public LogHandler(DiscordSocketClient client, CommandService commands)
         {
             _client = client;
-            _service = service;
             _commands = commands;
 
             _client.Log += Log;

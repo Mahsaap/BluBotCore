@@ -84,21 +84,21 @@ namespace BluBotCore.Modules.Commands
         //        $"{afterZone.DisplayName} -> {time.ToShortTimeString()}");
         //}
 
-        private string Timezones(string zone)
-        {
-            switch (zone.ToUpper())
-            {
-                case "IDL":
-                    return "Dateline Standard Time";
-                case "HST":
-                    return "Aleutian Standard Time";
-                case "AST":
-                    return "Atlantic Standard Time";
-                case "PST":
-                    return "Pacific Standard Time";
-                default:
-                    return "";
-            }
-        }
+        //private string Timezones(string zone)
+        //{
+        //    switch (zone.ToUpper())
+        //    {
+        //        case "IDL":
+        //            return "Dateline Standard Time";
+        //        case "HST":
+        //            return "Aleutian Standard Time";
+        //        case "AST":
+        //            return "Atlantic Standard Time";
+        //        case "PST":
+        //            return "Pacific Standard Time";
+        //        default:
+        //            return "";
+        //    }
+        //}
     }
 }

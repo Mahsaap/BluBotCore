@@ -1,4 +1,5 @@
 ﻿using BluBotCore.Handlers.Discord;
+using BluBotCore.Modules.Commands;
 using BluBotCore.Other;
 using Discord;
 using Discord.Addons.Interactive;
@@ -16,7 +17,7 @@ namespace BluBotCore.Services
 {
     class DiscordClient
     {
-        private DiscordSocketClient _client;
+        public DiscordSocketClient _client;
 
         public async Task MainAsync()
         {
@@ -33,7 +34,8 @@ namespace BluBotCore.Services
                 WebSocketProvider = WS4NetProvider.Instance,
                 LogLevel = LogSeverity.Info,
                 MessageCacheSize = 100,
-                AlwaysDownloadUsers = true
+                AlwaysDownloadUsers = true,
+                ExclusiveBulkDelete = true
             });
 
             IServiceProvider service = ConfigServices();
@@ -47,11 +49,11 @@ namespace BluBotCore.Services
 
         private void CheckSetupFile()
         {
-            string time = DateTime.Now.ToString("HH:MM:ss");
+            
             string filename = "setup.txt";
             if (!File.Exists(filename))
             {
-                Console.WriteLine($"{time} Setup       File {filename} not found!");
+                Console.WriteLine($"{Global.CurrentTime} Setup       File {filename} not found!");
                 using (StreamWriter file = new StreamWriter(filename, true, Encoding.UTF8))
                 {
                     file.WriteLine(Setup.DiscordAnnounceChannel);
@@ -61,10 +63,10 @@ namespace BluBotCore.Services
                     file.Flush();
                     file.Close();
                 }
-                Console.WriteLine($"{time} Setup       File {filename} created!");
+                Console.WriteLine($"{Global.CurrentTime} Setup       File {filename} created!");
 
             }
-            Console.WriteLine($"{time} Setup       File {filename} found!");
+            Console.WriteLine($"{Global.CurrentTime} Setup       File {filename} found!");
             List<string> tmpList = new List<string>();
             string data;
             using (StreamReader file = new StreamReader(filename))
@@ -88,18 +90,17 @@ namespace BluBotCore.Services
                 }
             }
             Setup.DiscordLogChannel = Convert.ToUInt64(tmpList[3]);
-            Console.WriteLine($"{time} Setup       File {filename} loaded!");
+            Console.WriteLine($"{Global.CurrentTime} Setup       File {filename} loaded!");
         }
 
         private bool CheckInitFile()
         {
-            string time = DateTime.Now.ToString("HH:MM:ss");
             string filename = "init.txt";
             if (File.Exists(filename))
             {
                 string data;
                 List<string> tmpList = new List<string>();
-                Console.WriteLine($"{time} Setup       File {filename} exists!");
+                Console.WriteLine($"{Global.CurrentTime} Setup       File {filename} exists!");
                 using (StreamReader file = new StreamReader(filename))
                 {
                     while ((data = file.ReadLine()) != null)
@@ -110,37 +111,22 @@ namespace BluBotCore.Services
                 Cred.TwitchAPIID = tmpList[1];
                 Cred.TwitchAPIToken = tmpList[2];
                 Cred.TwitchAPIRefreshToken = tmpList[3];
-                Console.WriteLine($"{time} Setup       File {filename} loaded!");
-                CheckEntryFile();
-                if (tmpList.Count >= 8)
-                {
-                    Cred.TwitterConsumerKey = tmpList[4];
-                    Cred.TwitterConsumerSecret = tmpList[5];
-                    Cred.TwitterAccessKey = tmpList[6];
-                    Cred.TwitterAccessSecret = tmpList[7];
-                    Console.WriteLine($"{time} Setup       Twitter Credentials Loaded");
-                    return true;
-                }
-                else
-                {
-                    Console.WriteLine($"{time} Setup       File entry.txt not found and twitter information does not seem to be present!");
-                    Console.WriteLine($"{time} Setup       Please add your twitter keys in entry.txt and restart the program.");
-                    return false;
-                }
+                Console.WriteLine($"{Global.CurrentTime} Setup       File {filename} loaded!");          
+                return true;
             }
             else
             {
-                Console.WriteLine($"{time} Setup       No {filename} file found!");
-                Console.WriteLine($"{time} Setup       Please enter your DISCORD TOKEN and press return.");
+                Console.WriteLine($"{Global.CurrentTime} Setup       No {filename} file found!");
+                Console.WriteLine($"{Global.CurrentTime} Setup       Please enter your DISCORD TOKEN and press return.");
                 string discordToken = Console.ReadLine();
                 Console.Clear();
-                Console.WriteLine($"{time} Setup       Please enter your TWITCHAPI ID and press return.");
+                Console.WriteLine($"{Global.CurrentTime} Setup       Please enter your TWITCHAPI ID and press return.");
                 string twitchapiID = Console.ReadLine();
                 Console.Clear();
-                Console.WriteLine($"{time} Setup       Please enter your TWITCHAPI TOKEN and press return.");
+                Console.WriteLine($"{Global.CurrentTime} Setup       Please enter your TWITCHAPI TOKEN and press return.");
                 string twitchapiToken = Console.ReadLine();
                 Console.Clear();
-                Console.WriteLine($"{time} Setup       Please enter your TWITCHAPI REFRESH TOKEN and press return.");
+                Console.WriteLine($"{Global.CurrentTime} Setup       Please enter your TWITCHAPI REFRESH TOKEN and press return.");
                 string twitchapiRefreshToken = Console.ReadLine();
                 Console.Clear();
 
@@ -158,50 +144,9 @@ namespace BluBotCore.Services
                     file.Flush();
                     file.Close();
                 }
-                Console.WriteLine($"{time} Setup       File {filename} has been generated.");
-                Console.WriteLine($"{time} Setup       Please restart the program.");
+                Console.WriteLine($"{Global.CurrentTime} Setup       File {filename} has been generated.");
+                Console.WriteLine($"{Global.CurrentTime} Setup       Please restart the program.");
                 return false;
-            }
-        }
-
-        private void CheckEntryFile()
-        {
-            string time = DateTime.Now.ToString("HH:MM:ss");
-            string filename = "entry.txt";
-            if (File.Exists(filename) && File.Exists("init.txt"))
-            {
-                string dataOld;
-                List<string> tmpList = new List<string>();
-                using (StreamReader file = new StreamReader("init.txt"))
-                {
-                    while ((dataOld = file.ReadLine()) != null)
-                        tmpList.Add(dataOld);
-                    file.Close();
-                }
-                string dataNew;
-                Console.WriteLine($"{time} Setup       File {filename} exists!");
-                using (StreamReader file = new StreamReader(filename))
-                {
-                    while ((dataNew = file.ReadLine()) != null)
-                        tmpList.Add(AES.Encrypt(dataNew));
-                    file.Close();
-                }
-                Cred.TwitterConsumerKey = tmpList[4];
-                Cred.TwitterConsumerSecret = tmpList[5];
-                Cred.TwitterAccessKey = tmpList[6];
-                Cred.TwitterAccessSecret = tmpList[7];
-                Console.WriteLine($"{time} Setup       File {filename} loaded!");
-                //Rewrites file from list<string>
-                File.WriteAllLines("init.txt", tmpList);
-                try
-                {
-                    File.Delete(filename);
-                    Console.WriteLine($"{time} Setup       File {filename} removed! (Data is now ecrypted and Stored in init.txt)");
-                }
-                catch
-                {
-                    Console.WriteLine("WARNING! VERIFY THIS FILE HAS BEEN REMOVED <> IF NOT PLEASE DELETE FILE, IT HAS BEEN LOADED!");
-                }
             }
         }
 
@@ -221,7 +166,6 @@ namespace BluBotCore.Services
             .AddSingleton<ClientHandler>()
             .AddSingleton<UserHandler>()
             .AddSingleton<CustomCommandsHandler>()
-            .AddSingleton<TwitterClient>()
             .AddSingleton<LiveMonitor>()
             .BuildServiceProvider();
         }
@@ -233,7 +177,6 @@ namespace BluBotCore.Services
             service.GetRequiredService<ClientHandler>();
             service.GetRequiredService<UserHandler>();
             service.GetRequiredService<CustomCommandsHandler>();
-            service.GetRequiredService<TwitterClient>();
             service.GetRequiredService<LiveMonitor>();
         }
     }

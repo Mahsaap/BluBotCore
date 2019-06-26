@@ -17,12 +17,10 @@ namespace BluBotCore.Handlers.Discord
         public static string customCMDPrefix = "?";
 
         private readonly DiscordSocketClient _client;
-        private readonly IServiceProvider _service;
 
-        public CustomCommandsHandler(IServiceProvider service, DiscordSocketClient client)
+        public CustomCommandsHandler(DiscordSocketClient client)
         {
             _client = client;
-            _service = service;
 
             _client.MessageReceived += Client_MessageReceived;
         }
@@ -45,7 +43,7 @@ namespace BluBotCore.Handlers.Discord
                 }
 
                 if ((message.Author as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) ||
-                (message.Author as IGuildUser).RoleIds.Contains(Setup.DiscordWYKTVRole) || (message.Author.Id == Constants.Discord.Mahsaap))
+                (message.Author as IGuildUser).RoleIds.Contains(Setup.DiscordWYKTVRole) || (message.Author.Id == DiscordIDs.Mahsaap))
                 {
                     //Add Check
                     if (command == "add")
@@ -83,6 +81,8 @@ namespace BluBotCore.Handlers.Discord
                         if (customCommands.ContainsKey(cmdRemove))
                         {
                             customCommands.TryRemove(cmdRemove, out string removeArg);
+                            await chan.SendMessageAsync($"Tag `{cmdRemove}` failed to be removed./n" +
+                                $"{removeArg}");
                             await chan.SendMessageAsync($"Tag `{cmdRemove}` has been removed.");
 
                             string filename = "customcmds.txt";

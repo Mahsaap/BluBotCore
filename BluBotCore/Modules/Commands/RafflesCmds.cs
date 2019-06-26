@@ -12,7 +12,7 @@ namespace BluBotCore.Modules.Commands
     //[RequireContext(ContextType.Guild)]
     public class RafflesCmds : InteractiveBase<SocketCommandContext>
     {
-        private static List<ulong> entries = new List<ulong>();
+        private static readonly List<ulong> entries = new List<ulong>();
         private static bool closed = false;
         private static string keyword;
         private static SocketUser raffleCreator;

@@ -1,5 +1,4 @@
-﻿using BluBotCore.DiscordHandlers;
-using BluBotCore.Other;
+﻿using BluBotCore.Other;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -40,11 +39,11 @@ namespace BluBotCore.Modules.Commands
             File.WriteAllLines(filename, tempLst);
         }
 
-        [Command("egg")]
-        public void EggAsync()
-        {
-            EasterEggsHandler.easterEggEnable = !EasterEggsHandler.easterEggEnable;
-        }
+        //[Command("egg")]
+        //public void EggAsync()
+        //{
+        //    EasterEggsHandler.easterEggEnable = !EasterEggsHandler.easterEggEnable;
+        //}
 
         [Command("encrypt")]
         [RequireContext(ContextType.DM)]
