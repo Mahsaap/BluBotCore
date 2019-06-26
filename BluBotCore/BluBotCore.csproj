@@ -5,7 +5,7 @@
     <TargetFramework>netcoreapp2.2</TargetFramework>
 
     <!--<RuntimeIdentifier>ubuntu.16.04-x64</RuntimeIdentifier>-->
-    
+
     <RuntimeIdentifier>win10-x64</RuntimeIdentifier>
   </PropertyGroup>
 
@@ -21,23 +21,27 @@
     <PackageReference Include="Discord.Addons.EmojiTools" Version="2.0.2" />
     <PackageReference Include="Discord.Addons.Interactive" Version="1.0.1" />
     <PackageReference Include="Discord.Addons.Preconditions" Version="1.2.0-alpha3" />
-    <PackageReference Include="Discord.Net" Version="2.0.2-dev-20190326.4" />
-    <PackageReference Include="Discord.Net.Commands" Version="2.0.2-dev-20190326.4" />
-    <PackageReference Include="Discord.Net.Core" Version="2.0.2-dev-20190326.4" />
-    <PackageReference Include="Discord.Net.Providers.WS4Net" Version="2.0.2-dev-20190326.4" />
-    <PackageReference Include="Discord.Net.Webhook" Version="2.0.2-dev-20190326.4" />
-    <PackageReference Include="Discord.Net.WebSocket" Version="2.0.2-dev-20190326.4" />
+    <PackageReference Include="Discord.Net" Version="2.2.0-dev-20190623.1" />
+    <PackageReference Include="Discord.Net.Commands" Version="2.2.0-dev-20190623.1" />
+    <PackageReference Include="Discord.Net.Core" Version="2.2.0-dev-20190623.1" />
+    <PackageReference Include="Discord.Net.Providers.WS4Net" Version="2.2.0-dev-20190623.1" />
+    <PackageReference Include="Discord.Net.Webhook" Version="2.2.0-dev-20190623.1" />
+    <PackageReference Include="Discord.Net.WebSocket" Version="2.2.0-dev-20190623.1" />
     <PackageReference Include="SteamStoreQuery" Version="1.0.4" />
     <PackageReference Include="StrawPollNET" Version="1.0.2" />
     <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.1" />
-    <PackageReference Include="TweetinviAPI" Version="4.0.0" />
-    <PackageReference Include="TwitchLib.Api" Version="3.0.6-CI-20190317-060258" />
+    <PackageReference Include="TwitchLib.Api" Version="3.0.6-CI-20190602-190709" />
   </ItemGroup>
 
   <ItemGroup>
     <None Update="setup.txt">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Discord\" />
+    <Folder Include="Twitch\" />
   </ItemGroup>
 
 </Project>
