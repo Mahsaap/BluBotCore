@@ -173,8 +173,8 @@ namespace BluBotCore.Services
                 RestUserMessage embed = _liveEmbeds[e.Channel].Item1;
                 if (_client.ConnectionState == ConnectionState.Connected)
                     await embed.DeleteAsync();
-                _liveEmbeds.TryRemove(e.Channel, out Tuple<RestUserMessage, string, string> outResult);
-                Console.WriteLine($"{Global.CurrentTime} Monitor     TryParse OutResult: {outResult}");
+                _ = _liveEmbeds.TryRemove(e.Channel, out _);
+                // Console.WriteLine($"{Global.CurrentTime} Monitor     TryParse OutResult: {outResult}");
             }
         }
 
