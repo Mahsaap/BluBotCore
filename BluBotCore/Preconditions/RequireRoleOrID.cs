@@ -11,11 +11,11 @@ namespace BluBotCore.Preconditions
     class RequireRoleOrID : PreconditionAttribute
     {
         /// <summary>Required mod roles for admin commands</summary>
-        private static List<ulong> _requiredRoleId = new List<ulong>(
+        private readonly static List<ulong> _requiredRoleId = new List<ulong>(
             new ulong[] { Setup.DiscordStaffRole , Setup.DiscordWYKTVRole });
         /// <summary>Required user w/o role for admin commands</summary>
-        private static List<ulong> _requiredUserID = new List<ulong>(
-            new ulong[] { Constants.Discord.Mahsaap, Constants.Discord.Space });
+        private readonly static List<ulong> _requiredUserID = new List<ulong>(
+            new ulong[] { DiscordIDs.Mahsaap, DiscordIDs.Space });
 
         public RequireRoleOrID()
         {
