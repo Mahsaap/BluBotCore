@@ -30,7 +30,7 @@
     <PackageReference Include="SteamStoreQuery" Version="1.0.4" />
     <PackageReference Include="StrawPollNET" Version="1.0.2" />
     <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.1" />
-    <PackageReference Include="TwitchLib.Api" Version="3.0.6-CI-20190707-175305" />
+    <PackageReference Include="TwitchLib.Api" Version="3.0.6-CI-20190905-060235" />
   </ItemGroup>
 
   <ItemGroup>
