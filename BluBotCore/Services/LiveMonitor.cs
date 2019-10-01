@@ -404,9 +404,9 @@ namespace BluBotCore.Services
 
         private async Task<string> ImageCheck(string url)
         {
+            WebClient webClient = new WebClient();
             try
             {
-                WebClient webClient = new WebClient();
                 byte[] image = webClient.DownloadData(url);
 
                 for (int i = 0; i < Twitch.TwitchPinkScreenRetryAttempts; i++)
@@ -438,6 +438,10 @@ namespace BluBotCore.Services
                 await mahsaap.SendMessageAsync(ex.Message + "\n" + ex.StackTrace);
                 //cannot return null - code checks for length > 1
                 return "";
+            }
+            finally
+            {
+                webClient.Dispose();
             }
         }
     }
