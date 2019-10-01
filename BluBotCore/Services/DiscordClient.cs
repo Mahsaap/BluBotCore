@@ -82,12 +82,10 @@ namespace BluBotCore.Services
             if (tmpList.Count == 3)
             {
                 tmpList.Add("0");
-                using (StreamWriter file = new StreamWriter(filename, true, Encoding.UTF8))
-                {
-                    file.WriteLine("0");
-                    file.Flush();
-                    file.Close();
-                }
+                using StreamWriter file = new StreamWriter(filename, true, Encoding.UTF8);
+                file.WriteLine("0");
+                file.Flush();
+                file.Close();
             }
             Setup.DiscordLogChannel = Convert.ToUInt64(tmpList[3]);
             Console.WriteLine($"{Global.CurrentTime} Setup       File {filename} loaded!");

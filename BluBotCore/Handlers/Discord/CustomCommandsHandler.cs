@@ -60,12 +60,10 @@ namespace BluBotCore.Handlers.Discord
                             await chan.SendMessageAsync($"Tag `{cmdAdd}` has been added with a value of `{valueAdd}`.");
 
                             string filename = "customcmds.txt";
-                            using (StreamWriter file = new StreamWriter(filename, true, Encoding.UTF8))
-                            {
-                                file.WriteLine($"{cmdAdd}~{valueAdd}");
-                                file.Flush();
-                                file.Close();
-                            }
+                            using StreamWriter file = new StreamWriter(filename, true, Encoding.UTF8);
+                            file.WriteLine($"{cmdAdd}~{valueAdd}");
+                            file.Flush();
+                            file.Close();
                         }
                         else
                         {
