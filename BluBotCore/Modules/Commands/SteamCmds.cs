@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace BluBotCore.Modules
+namespace BluBotCore.Modules.Commands
 {
     [Name("Steam")]
     public class SteamCmds : InteractiveBase<SocketCommandContext>
@@ -16,7 +16,6 @@ namespace BluBotCore.Modules
         [Summary("Search the steam store (!steam game).")]
         public async Task SteamQueryAsync([Remainder]string game)
         {
-            DateTime currentTime = DateTime.Now;
             game = game.Replace(' ', '_');
             try
             {

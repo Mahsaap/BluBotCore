@@ -5,14 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace BluBotCore.Modules
+namespace BluBotCore.Modules.Commands
 {
     //BROKEN ATM
     //[Name("Raffle")]
     //[RequireContext(ContextType.Guild)]
     public class RafflesCmds : InteractiveBase<SocketCommandContext>
     {
-        private static List<ulong> entries = new List<ulong>();
+        private static readonly List<ulong> entries = new List<ulong>();
         private static bool closed = false;
         private static string keyword;
         private static SocketUser raffleCreator;

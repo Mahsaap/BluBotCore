@@ -13,7 +13,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BluBotCore.Modules
+namespace BluBotCore.Modules.Commands
 {
     [Name("Admin")]
     [RequireContext(ContextType.Guild)]
@@ -23,7 +23,7 @@ namespace BluBotCore.Modules
         [Command("version")]
         public async Task VersionAsync()
         {
-            await ReplyAsync("V1.09");
+            await ReplyAsync($"V{Version.Major}.{Version.Minor}");
         }
 
         //End application - ConsoleApp
@@ -103,10 +103,7 @@ namespace BluBotCore.Modules
         public async Task BotInfoAsync()
         {
             RestApplication application = await Context.Client.GetApplicationInfoAsync();
-            //string guildsString = "";
-            //foreach (SocketGuild g in Context.Client.Guilds) guildsString += $"{g.Name} (Channels: {g.Channels.Count} - Users: {g.Users.Count})\n";
-            //guildsString += $"\nTotal (Channels: {Context.Client.Guilds.Sum(g => g.Channels.Count)} - Users: {Context.Client.Guilds.Sum(g => g.Users.Count)})";
-            //Version version = Assembly.GetEntryAssembly().GetName().Version;
+
             EmbedBuilder eb = new EmbedBuilder()
             {
                 Color = new Discord.Color(51, 102, 153),
@@ -123,10 +120,9 @@ namespace BluBotCore.Modules
                 x.Name = "Libraries Used";
                 x.Value = "" +
                 $"Discord.Net ({DiscordConfig.Version})\n" +
-                "TwitchLib 3.0.3\n" +
+                "TwitchLib CI-20200107\n" +
                 "StrawPollNet 1.0.2\n" +
-                "SteamStoreQuery 1.0.4\n" +
-                "TweetInvi 4.0.0";
+                "SteamStoreQuery 1.0.4";
                 x.IsInline = false;
             });
             eb.AddField(x =>
@@ -146,7 +142,13 @@ namespace BluBotCore.Modules
             string guildsStr = "";
             foreach (SocketGuild guild in Context.Client.Guilds)
             {
-                guildsStr += $"{guild.Name} ({guild.Id}) > Member Count = {guild.MemberCount}\n";
+                guildsStr += $">\n{guild.Name} ({guild.Id})\n" +
+                    $"- Member Count = {guild.MemberCount}\n" +
+                    $"- Channel Count = {guild.Channels.Count}\n" +
+                    $"- - Voice = {guild.VoiceChannels.Count}\n" +
+                    $"- - Text = {guild.TextChannels.Count}\n" +
+                    $"- Role Count = {guild.Roles.Count}\n" +
+                    $"- Owner = {guild.Owner}({guild.OwnerId})\n";
             }
             eb.AddField(x =>
             {

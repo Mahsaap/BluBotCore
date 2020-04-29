@@ -9,20 +9,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BluBotCore.DiscordHandlers
+namespace BluBotCore.Handlers.Discord
 {
-    class CustomCommands
+    class CustomCommandsHandler
     {
         public static ConcurrentDictionary<string, string> customCommands = new ConcurrentDictionary<string, string>();
         public static string customCMDPrefix = "?";
 
         private readonly DiscordSocketClient _client;
-        private readonly IServiceProvider _service;
 
-        public CustomCommands(IServiceProvider service, DiscordSocketClient client)
+        public CustomCommandsHandler(DiscordSocketClient client)
         {
             _client = client;
-            _service = service;
 
             _client.MessageReceived += Client_MessageReceived;
         }
@@ -45,7 +43,7 @@ namespace BluBotCore.DiscordHandlers
                 }
 
                 if ((message.Author as IGuildUser).RoleIds.Contains(Setup.DiscordStaffRole) ||
-                (message.Author as IGuildUser).RoleIds.Contains(Setup.DiscordWYKTVRole) || (message.Author.Id == Constants.Discord.Mahsaap))
+                (message.Author as IGuildUser).RoleIds.Contains(Setup.DiscordWYKTVRole) || (message.Author.Id == DiscordIDs.Mahsaap))
                 {
                     //Add Check
                     if (command == "add")
@@ -62,12 +60,10 @@ namespace BluBotCore.DiscordHandlers
                             await chan.SendMessageAsync($"Tag `{cmdAdd}` has been added with a value of `{valueAdd}`.");
 
                             string filename = "customcmds.txt";
-                            using (StreamWriter file = new StreamWriter(filename, true, Encoding.UTF8))
-                            {
-                                file.WriteLine($"{cmdAdd}~{valueAdd}");
-                                file.Flush();
-                                file.Close();
-                            }
+                            using StreamWriter file = new StreamWriter(filename, true, Encoding.UTF8);
+                            file.WriteLine($"{cmdAdd}~{valueAdd}");
+                            file.Flush();
+                            file.Close();
                         }
                         else
                         {
@@ -83,6 +79,8 @@ namespace BluBotCore.DiscordHandlers
                         if (customCommands.ContainsKey(cmdRemove))
                         {
                             customCommands.TryRemove(cmdRemove, out string removeArg);
+                            await chan.SendMessageAsync($"Tag `{cmdRemove}` failed to be removed./n" +
+                                $"{removeArg}");
                             await chan.SendMessageAsync($"Tag `{cmdRemove}` has been removed.");
 
                             string filename = "customcmds.txt";

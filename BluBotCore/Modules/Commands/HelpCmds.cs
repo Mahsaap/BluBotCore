@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BluBotCore.Modules
+namespace BluBotCore.Modules.Commands
 {
     [Name("Help")]
     public class HelpCmds : ModuleBase<SocketCommandContext>
@@ -14,7 +14,7 @@ namespace BluBotCore.Modules
         private readonly CommandService _commands;
         private readonly IServiceProvider _map;
         //private List<string> ignoreList = new List<string>();
-        private List<string> hideList = new List<string>();
+        private readonly List<string> hideList = new List<string>();
 
         public HelpCmds(IServiceProvider map, CommandService commands)
         {
@@ -26,7 +26,6 @@ namespace BluBotCore.Modules
             hideList.Add("LiveMonitor");
             hideList.Add("Owner");
             hideList.Add("Help");
-            hideList.Add("Twitter");
         }
 
         [Command("help")]

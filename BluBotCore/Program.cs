@@ -5,7 +5,7 @@ namespace BluBotCore
 {
     class Program
     {
-        public static async Task Main(string[] args)
+        public static async Task Main()
         {
             DiscordClient _discord = new DiscordClient();
             await _discord.MainAsync();
