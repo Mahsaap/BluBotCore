@@ -1,5 +1,4 @@
 ﻿using BluBotCore.Handlers.Discord;
-using BluBotCore.Modules.Commands;
 using BluBotCore.Other;
 using Discord;
 using Discord.Addons.Interactive;
@@ -53,7 +52,7 @@ namespace BluBotCore.Services
             string filename = "setup.txt";
             if (!File.Exists(filename))
             {
-                Console.WriteLine($"{Global.CurrentTime} Setup       File {filename} not found!");
+                //Console.WriteLine($"{Global.CurrentTime} Setup       File {filename} not found!");
                 using (StreamWriter file = new StreamWriter(filename, true, Encoding.UTF8))
                 {
                     file.WriteLine(Setup.DiscordAnnounceChannel);
@@ -66,7 +65,7 @@ namespace BluBotCore.Services
                 Console.WriteLine($"{Global.CurrentTime} Setup       File {filename} created!");
 
             }
-            Console.WriteLine($"{Global.CurrentTime} Setup       File {filename} found!");
+            //Console.WriteLine($"{Global.CurrentTime} Setup       File {filename} found!");
             List<string> tmpList = new List<string>();
             string data;
             using (StreamReader file = new StreamReader(filename))
@@ -98,7 +97,7 @@ namespace BluBotCore.Services
             {
                 string data;
                 List<string> tmpList = new List<string>();
-                Console.WriteLine($"{Global.CurrentTime} Setup       File {filename} exists!");
+                //Console.WriteLine($"{Global.CurrentTime} Setup       File {filename} exists!");
                 using (StreamReader file = new StreamReader(filename))
                 {
                     while ((data = file.ReadLine()) != null)
