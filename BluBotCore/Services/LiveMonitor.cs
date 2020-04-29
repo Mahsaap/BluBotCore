@@ -29,7 +29,7 @@ namespace BluBotCore.Services
             private static DateTime _botOnlineTime;
 
             /// <summary> Dictionary of all the live discord messages. Concurrent since this can be added/removed from at anytime. </summary>
-            public static ConcurrentDictionary<string, Tuple<RestUserMessage,string,string>> _liveEmbeds = new ConcurrentDictionary<string, Tuple<RestUserMessage,string,string>>();
+            public static ConcurrentDictionary<string, Tuple<RestUserMessage,string,string,int>> _liveEmbeds = new ConcurrentDictionary<string, Tuple<RestUserMessage,string,string,int>>();
 
         #endregion
 
@@ -147,8 +147,8 @@ namespace BluBotCore.Services
 
             if (!_liveEmbeds.ContainsKey(ee.Stream.Channel.Id)){
                 string url = @"https://www.twitch.tv/" + ee.Stream.Channel.Name;
-                EmbedBuilder eb = SetupLiveEmbed($":link: {ee.Stream.Channel.DisplayName}", $"{ee.Stream.Channel.Status}", $"{ee.Stream.Channel.Game}",
-                    ee.Stream.Preview.Medium + Guid.NewGuid(), ee.Stream.Channel.Logo, url);
+                EmbedBuilder eb = SetupLiveEmbed($":link: {ee.Stream.Channel.DisplayName}", ee.Stream.Channel.Status, ee.Stream.Channel.Game,
+                    ee.Stream.Preview.Medium + Guid.NewGuid(), ee.Stream.Channel.Logo, url, ee.Stream.Viewers);
 
                 Console.WriteLine($"{Global.CurrentTime} Monitor     {ee.Stream.Channel.DisplayName} is live playing {ee.Stream.Game}");
 
@@ -188,14 +188,15 @@ namespace BluBotCore.Services
                     {
                         if (Setup.DiscordAnnounceChannel == 0) return;
                         var msg = _liveEmbeds[e.Channel];
-                        if (msg.Item2 != ee.Stream.Channel.Status || msg.Item3 != ee.Stream.Channel.Game)
+                        if (msg.Item2 != ee.Stream.Channel.Status || msg.Item3 != ee.Stream.Channel.Game || msg.Item4 != ee.Stream.Viewers)
                         {
                             EmbedBuilder eb = SetupLiveEmbed($":link: {ee.Stream.Channel.DisplayName}", $"{ee.Stream.Channel.Status}", $"{ee.Stream.Channel.Game}",
-                                ee.Stream.Preview.Medium + Guid.NewGuid().ToString(), ee.Stream.Channel.Logo, @"https://www.twitch.tv/" + ee.Stream.Channel.Name);
+                                ee.Stream.Preview.Medium + Guid.NewGuid().ToString(), ee.Stream.Channel.Logo, @"https://www.twitch.tv/" + ee.Stream.Channel.Name, ee.Stream.Viewers);
 
                             await UpdateNotificationAsync(eb, _liveEmbeds, e);
 
                             Console.WriteLine($"{Global.CurrentTime} Monitor     Stream {ee.Stream.Channel.DisplayName} updated");
+                            await Task.Delay(500);
                         }
                     }
                 }
@@ -236,8 +237,8 @@ namespace BluBotCore.Services
                 foreach (var x in livestreamers.Streams)
                 {
                     var xx = await API.V5.Streams.GetStreamByUserAsync(x.Channel.Id);
-                    EmbedBuilder eb = SetupLiveEmbed($":link: {xx.Stream.Channel.DisplayName}", $"{xx.Stream.Channel.Status}", $"{xx.Stream.Channel.Game}",
-                    xx.Stream.Preview.Medium + Guid.NewGuid().ToString(), xx.Stream.Channel.Logo, @"https://www.twitch.tv/" + xx.Stream.Channel.Name);
+                    EmbedBuilder eb = SetupLiveEmbed($":link: {xx.Stream.Channel.DisplayName}", xx.Stream.Channel.Status, xx.Stream.Channel.Game,
+                    xx.Stream.Preview.Medium + Guid.NewGuid().ToString(), xx.Stream.Channel.Logo, @"https://www.twitch.tv/" + xx.Stream.Channel.Name, xx.Stream.Viewers);
 
                     Console.WriteLine($"{Global.CurrentTime} Monitor     {xx.Stream.Channel.DisplayName} is live playing {xx.Stream.Game}");
                     await Task.Delay(1000);
@@ -251,18 +252,18 @@ namespace BluBotCore.Services
             Console.WriteLine($"{Global.CurrentTime} Monitor     Streams Set!");
         }
 
-        private async Task UpdateNotificationAsync(EmbedBuilder eb, ConcurrentDictionary<string, Tuple<RestUserMessage, string, string>> lst, OnStreamUpdateArgs e)
+        private async Task UpdateNotificationAsync(EmbedBuilder eb, ConcurrentDictionary<string, Tuple<RestUserMessage, string, string, int>> lst, OnStreamUpdateArgs e)
         {
             var ee = await API.V5.Streams.GetStreamByUserAsync(e.Channel);
             if (lst.ContainsKey(e.Channel))
             {
                 var msg = lst[e.Channel];
                 await msg.Item1.ModifyAsync(x => x.Embed = eb.Build());
-                lst[e.Channel] = new Tuple<RestUserMessage, string, string>(msg.Item1, ee.Stream.Channel.Status, ee.Stream.Channel.Game);
+                lst[e.Channel] = new Tuple<RestUserMessage, string, string, int>(msg.Item1, ee.Stream.Channel.Status, ee.Stream.Channel.Game, ee.Stream.Viewers);
             }
         }
 
-        private EmbedBuilder SetupLiveEmbed(string title, string description, string game, string image, string thumbnail, string url)
+        private EmbedBuilder SetupLiveEmbed(string title, string description, string game, string image, string thumbnail, string url, int vCount)
         {
 
             title = Global.NullEmptyCheck(title);
@@ -280,7 +281,13 @@ namespace BluBotCore.Services
             {
                 x.Name = $"Playing";
                 x.Value = game;
-                x.IsInline = false;
+                x.IsInline = true;
+            });
+            eb.AddField(x =>
+            {
+                x.Name = $"Viewer Count";
+                x.Value = vCount;
+                x.IsInline = true;
             });
             eb.WithImageUrl(ImageCheck(image).Result);
             eb.WithThumbnailUrl(thumbnail);
@@ -327,11 +334,11 @@ namespace BluBotCore.Services
                             if (Setup.DiscordAnnounceChannel == 0) return false;
                             var msg = _liveEmbeds[channelID];
 
-                            EmbedBuilder eb = SetupLiveEmbed($":link: {ee.Stream.Channel.DisplayName}", $"{ee.Stream.Channel.Status}", $"{ee.Stream.Channel.Game}",
-                                ee.Stream.Preview.Medium + Guid.NewGuid().ToString(), ee.Stream.Channel.Logo, @"https://www.twitch.tv/" + ee.Stream.Channel.Name);
+                            EmbedBuilder eb = SetupLiveEmbed($":link: {ee.Stream.Channel.DisplayName}", ee.Stream.Channel.Status, ee.Stream.Channel.Game,
+                                ee.Stream.Preview.Medium + Guid.NewGuid().ToString(), ee.Stream.Channel.Logo, @"https://www.twitch.tv/" + ee.Stream.Channel.Name, ee.Stream.Viewers);
 
                             await msg.Item1.ModifyAsync(x => x.Embed = eb.Build());
-                            _liveEmbeds[channelID] = new Tuple<RestUserMessage, string, string>(msg.Item1, ee.Stream.Channel.Status, ee.Stream.Channel.Game);
+                            _liveEmbeds[channelID] = new Tuple<RestUserMessage, string, string,int>(msg.Item1, ee.Stream.Channel.Status, ee.Stream.Channel.Game, ee.Stream.Viewers);
 
                             Console.WriteLine($"{Global.CurrentTime} Monitor     Stream {ee.Stream.Channel.DisplayName} updated");
                             return true;
@@ -359,7 +366,7 @@ namespace BluBotCore.Services
                 RestUserMessage embed = _liveEmbeds[channelID].Item1;
                 if (_client.ConnectionState == ConnectionState.Connected)
                     await embed.DeleteAsync();
-                _liveEmbeds.TryRemove(channelID, out Tuple<RestUserMessage, string, string> outResult);
+                _liveEmbeds.TryRemove(channelID, out Tuple<RestUserMessage, string, string, int> outResult);
                 Console.WriteLine($"{Global.CurrentTime} Monitor     TryParse OutResult: {outResult}");
                 return true;
             }
@@ -379,7 +386,8 @@ namespace BluBotCore.Services
             string channelID = ee?.Stream.Channel.Id ?? s?.Channel.Id;
             string channelName = ee?.Stream.Channel.DisplayName ?? s?.Channel.DisplayName;
             string status = ee?.Stream.Channel.Status ?? s?.Channel.Status;
-            string game = ee?.Stream.Channel.Game ?? s?.Channel.Game;            
+            string game = ee?.Stream.Channel.Game ?? s?.Channel.Game;
+            int vCount = ee?.Stream.Viewers ?? s.Viewers;
 
             if (Setup.DiscordAnnounceChannel == 0) return;
             if (_client.ConnectionState == ConnectionState.Connected)
@@ -389,16 +397,16 @@ namespace BluBotCore.Services
                 here += $"\nTwitch (*{twitchURL}*)";
                 here = here.Insert(0, $"**{channelName} is live!** ");
 
-                await SendEmbedAsync(Setup.DiscordAnnounceChannel, eb, here, channelID, status, game);
+                await SendEmbedAsync(Setup.DiscordAnnounceChannel, eb, here, channelID, status, game, vCount);
             }
         }
 
-        private async Task SendEmbedAsync(ulong id, EmbedBuilder eb, string here, string channelID, string status, string game)
+        private async Task SendEmbedAsync(ulong id, EmbedBuilder eb, string here, string channelID, string status, string game, int vCount)
         {
             var chan = _client.GetChannel(id) as SocketTextChannel;
             RestUserMessage msg = await chan.SendMessageAsync(here, embed: eb.Build());
-            if (_liveEmbeds.ContainsKey(channelID)) _liveEmbeds[channelID] = new Tuple<RestUserMessage, string, string>(msg, status, game);
-            else _liveEmbeds.TryAdd(channelID, new Tuple<RestUserMessage, string, string>(msg, status, game));
+            if (_liveEmbeds.ContainsKey(channelID)) _liveEmbeds[channelID] = new Tuple<RestUserMessage, string, string, int>(msg, status, game, vCount);
+            else _liveEmbeds.TryAdd(channelID, new Tuple<RestUserMessage, string, string, int>(msg, status, game, vCount));
             await Task.CompletedTask;
         }
 
