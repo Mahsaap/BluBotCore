@@ -24,7 +24,6 @@ namespace BluBotCore.Handlers.Discord
             LoadCustomCmdFile();
             await _client.SetStatusAsync(UserStatus.Online);
             await _client.SetGameAsync("WYKTV Monitoring");
-
         }
 
         private void LoadCustomCmdFile()
