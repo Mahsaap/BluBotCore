@@ -2,6 +2,7 @@
 using Discord.Commands;
 using Discord.WebSocket;
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace BluBotCore.Handlers.Discord
@@ -19,7 +20,7 @@ namespace BluBotCore.Handlers.Discord
             _client.Log += Log;
             _commands.Log += Log;
         }
-        private Task Log(LogMessage msg)
+        private async Task Log(LogMessage msg)
         {
             switch (msg.Severity)
             {
@@ -45,20 +46,27 @@ namespace BluBotCore.Handlers.Discord
 
             if (msg.Severity == LogSeverity.Error || msg.Severity == LogSeverity.Warning || msg.Severity == LogSeverity.Critical)
             {
-                string msge = msg.ToString();
-                if (msg.Message != null && msg.Exception != null && msg.Exception.InnerException != null) { 
-                    if (msg.Message.Contains("System.Exception: Unexpected close")) { }                                            
-                    else
+                string msge = msg.ToString();                
+                if (msg.Message != null && msg.Exception != null && msg.Exception.InnerException != null) {
+                    try
+                    {
+                        IMessageChannel chan;
+                        if (Debugger.IsAttached)
+                            chan = _client.GetChannel(DiscordIDs.DebugLogsTest) as IMessageChannel;
+                        else
+                            chan = _client.GetChannel(DiscordIDs.DebugLogsWYK) as IMessageChannel;
+                        await chan.SendMessageAsync(msge);
+                    }
+                    catch
                     {
                         var mahsaap = _client.GetUser(88798728948809728) as IUser;
-                        mahsaap.SendMessageAsync(msge);
+                        await mahsaap.SendMessageAsync(msge);
                     }
                 }
-                
             }
             Console.WriteLine(msg.ToString());
             Console.ResetColor();
-            return Task.CompletedTask;
+            //return Task.CompletedTask;
         }
     }
 }
