@@ -3,6 +3,6 @@
     public class Version
     {
         public static string Major { get { return "1"; } }
-        public static string Minor { get { return "13"; } }
+        public static string Minor { get { return "14"; } }
     }
 }
