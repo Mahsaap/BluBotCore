@@ -26,7 +26,7 @@ namespace BluBotCore.Modules.Commands
         public async Task LMListAsync()
         {
             if (LiveMonitor.MonitoredChannels.Count <= 0) return;
-            string result = $"**{LiveMonitor.MonitoredChannels.Count} casters are being monitored:**\n```";
+            string result = $"**{LiveMonitor.MonitoredChannels.Count} casters are being monitored:**\n```\n";
             foreach (string entry in LiveMonitor.MonitoredChannels.Keys)
             {
                 result += $"{entry}\n";
