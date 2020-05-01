@@ -58,12 +58,9 @@ namespace BluBotCore.Services
         /// <summary> Live Monitor configuration. </summary>
         private async Task ConfigLiveMonitorAsync()
         {
-            Console.WriteLine($"{Global.CurrentTime} Monitor     Checking if Discord is connected!");
-
             // Ensure Discord is connected before config continues. Loop every 2 seconds till online.
             while (_client.ConnectionState != ConnectionState.Connected)
             {
-                Console.WriteLine($"{Global.CurrentTime} Monitor     Waiting 2 seconds.");
                 await Task.Delay(2000);
             }
             try
