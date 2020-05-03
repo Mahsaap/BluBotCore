@@ -33,7 +33,6 @@ namespace BluBotCore.Handlers.Discord
             {
                 ConcurrentDictionary<string, string> tmpList = new ConcurrentDictionary<string, string>();
                 string dataNew;
-                Console.WriteLine($"{Global.CurrentTime} Setup       File {filename} exists!");
                 using (StreamReader file = new StreamReader(filename))
                 {
                     while ((dataNew = file.ReadLine()) != null)
@@ -49,7 +48,6 @@ namespace BluBotCore.Handlers.Discord
             }
             else
             {
-                Console.WriteLine($"{Global.CurrentTime} Setup       File {filename} does not exist!");
                 using (StreamWriter file = new StreamWriter(filename, true, Encoding.UTF8))
                 {
                     file.Flush();

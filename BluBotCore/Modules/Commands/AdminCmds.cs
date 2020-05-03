@@ -120,7 +120,7 @@ namespace BluBotCore.Modules.Commands
                 x.Name = "Libraries Used";
                 x.Value = "" +
                 $"Discord.Net ({DiscordConfig.Version})\n" +
-                "TwitchLib CI-20200107\n" +
+                "TwitchLib.API 3.1.3\n" +
                 "StrawPollNet 1.0.2\n" +
                 "SteamStoreQuery 1.0.4";
                 x.IsInline = false;
@@ -143,11 +143,11 @@ namespace BluBotCore.Modules.Commands
             foreach (SocketGuild guild in Context.Client.Guilds)
             {
                 guildsStr += $">\n{guild.Name} ({guild.Id})\n" +
-                    $"- Member Count = {guild.MemberCount}\n" +
-                    $"- Channel Count = {guild.Channels.Count}\n" +
-                    $"- - Voice = {guild.VoiceChannels.Count}\n" +
-                    $"- - Text = {guild.TextChannels.Count}\n" +
-                    $"- Role Count = {guild.Roles.Count}\n" +
+                    $"- Members = {guild.MemberCount}\n" +
+                    $"- Channels = {guild.Channels.Count}\n" +
+                    $"-- Voice = {guild.VoiceChannels.Count}\n" +
+                    $"-- Text = {guild.TextChannels.Count}\n" +
+                    $"- Roles = {guild.Roles.Count}\n" +
                     $"- Owner = {guild.Owner}({guild.OwnerId})\n";
             }
             eb.AddField(x =>
