@@ -18,6 +18,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Discord\**" />
+    <Compile Remove="Twitch\**" />
+    <EmbeddedResource Remove="Discord\**" />
+    <EmbeddedResource Remove="Twitch\**" />
+    <None Remove="Discord\**" />
+    <None Remove="Twitch\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Discord.Addons.EmojiTools" Version="2.0.2" />
     <PackageReference Include="Discord.Addons.Interactive" Version="1.0.1" />
     <PackageReference Include="Discord.Addons.Preconditions" Version="2.2.0-dev3" />
@@ -38,11 +47,6 @@
     <None Update="setup.txt">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Discord\" />
-    <Folder Include="Twitch\" />
   </ItemGroup>
 
 </Project>
