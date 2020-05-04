@@ -44,7 +44,7 @@ namespace BluBotCore.Handlers.Discord
                     file.Close();
                 }
                 CustomCommandsHandler.customCommands = tmpList;
-                Console.WriteLine($"{Global.CurrentTime} Setup       File {filename} loaded!");
+                Console.WriteLine($"{Globals.CurrentTime} Setup       File {filename} loaded!");
             }
             else
             {
@@ -53,7 +53,7 @@ namespace BluBotCore.Handlers.Discord
                     file.Flush();
                     file.Close();
                 }
-                Console.WriteLine($"{Global.CurrentTime} Setup       File {filename} has been created!");
+                Console.WriteLine($"{Globals.CurrentTime} Setup       File {filename} has been created!");
             }
         }
     }

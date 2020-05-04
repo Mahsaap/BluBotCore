@@ -71,11 +71,11 @@ namespace BluBotCore.Handlers.Discord
 
             var logChan = _client.GetChannel(Setup.DiscordLogChannel) as SocketTextChannel;
 
-            string message = $"{Global.CurrentTime} [SERVER] {user.Username}#{user.Discriminator} has been UNBANNED. " +
+            string message = $"{Globals.CurrentTime} [SERVER] {user.Username}#{user.Discriminator} has been UNBANNED. " +
                 $"\n({user.Id})";
 
             await logChan.SendMessageAsync($"```{message}```");
-            Console.WriteLine($"{Global.CurrentTime} Discord     {message}");
+            Console.WriteLine($"{Globals.CurrentTime} Discord     {message}");
         }
 
         private async Task Client_UserBanned(SocketUser user, SocketGuild guild)
@@ -84,11 +84,11 @@ namespace BluBotCore.Handlers.Discord
 
             var logChan = _client.GetChannel(Setup.DiscordLogChannel) as SocketTextChannel;
 
-            string message = $"{Global.CurrentTime} [SERVER] {user.Username}#{user.Discriminator} has been BANNED. " +
+            string message = $"{Globals.CurrentTime} [SERVER] {user.Username}#{user.Discriminator} has been BANNED. " +
                 $"\n({user.Id})";
 
             await logChan.SendMessageAsync($"```{message}```");
-            Console.WriteLine($"{Global.CurrentTime} Discord     {message}");
+            Console.WriteLine($"{Globals.CurrentTime} Discord     {message}");
         }
 
         private async Task Client_UserLeft(SocketGuildUser guildUser)
@@ -97,11 +97,11 @@ namespace BluBotCore.Handlers.Discord
 
             var logChan = _client.GetChannel(Setup.DiscordLogChannel) as SocketTextChannel;
 
-            string message = $"{Global.CurrentTime} [SERVER] {guildUser.Username}#{guildUser.Discriminator} has LEFT or KICKED. " +
+            string message = $"{Globals.CurrentTime} [SERVER] {guildUser.Username}#{guildUser.Discriminator} has LEFT or KICKED. " +
                 $"\n({guildUser.Id})";
 
             await logChan.SendMessageAsync($"```{message}```");
-            Console.WriteLine($"{Global.CurrentTime} Discord     {message}");
+            Console.WriteLine($"{Globals.CurrentTime} Discord     {message}");
         }
 
         private async Task Client_UserJoined(SocketGuildUser guildUser)
@@ -110,11 +110,11 @@ namespace BluBotCore.Handlers.Discord
 
             var logChan = _client.GetChannel(Setup.DiscordLogChannel) as SocketTextChannel;
 
-            string message = $"{Global.CurrentTime} [SERVER] {guildUser.Username}#{guildUser.Discriminator} has JOINED. " +
+            string message = $"{Globals.CurrentTime} [SERVER] {guildUser.Username}#{guildUser.Discriminator} has JOINED. " +
                 $"\n({guildUser.Id})";
 
             await logChan.SendMessageAsync($"```{message}```");
-            Console.WriteLine($"{Global.CurrentTime} Discord     {message}");
+            Console.WriteLine($"{Globals.CurrentTime} Discord     {message}");
         }
     }
 }
