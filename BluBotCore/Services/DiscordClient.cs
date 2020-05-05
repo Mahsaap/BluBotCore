@@ -48,7 +48,7 @@ namespace BluBotCore.Services
 
         private void CheckSetupFile()
         {
-            
+
             string filename = "setup.txt";
             if (!File.Exists(filename))
             {
@@ -61,7 +61,7 @@ namespace BluBotCore.Services
                     file.Flush();
                     file.Close();
                 }
-                Console.WriteLine($"{Global.CurrentTime} Setup       File {filename} created!");
+                Console.WriteLine($"{Globals.CurrentTime} Setup       File {filename} created!");
 
             }
             List<string> tmpList = new List<string>();
@@ -85,7 +85,7 @@ namespace BluBotCore.Services
                 file.Close();
             }
             Setup.DiscordLogChannel = Convert.ToUInt64(tmpList[3]);
-            Console.WriteLine($"{Global.CurrentTime} Setup       File {filename} loaded!");
+            Console.WriteLine($"{Globals.CurrentTime} Setup       File {filename} loaded!");
         }
 
         private bool CheckInitFile()
@@ -103,30 +103,30 @@ namespace BluBotCore.Services
                 }
                 Cred.DiscordTok = tmpList[0];
                 Cred.TwitchAPIID = tmpList[1];
-                Cred.TwitchAPIToken = tmpList[2];
+                Cred.TwitchAPISecret = tmpList[2];
                 Cred.TwitchAPIRefreshToken = tmpList[3];
-                Console.WriteLine($"{Global.CurrentTime} Setup       File {filename} loaded!");          
+                Console.WriteLine($"{Globals.CurrentTime} Setup       File {filename} loaded!");
                 return true;
             }
             else
             {
-                Console.WriteLine($"{Global.CurrentTime} Setup       No {filename} file found!");
-                Console.WriteLine($"{Global.CurrentTime} Setup       Please enter your DISCORD TOKEN and press return.");
+                Console.WriteLine($"{Globals.CurrentTime} Setup       No {filename} file found!");
+                Console.WriteLine($"{Globals.CurrentTime} Setup       Please enter your DISCORD TOKEN and press return.");
                 string discordToken = Console.ReadLine();
                 Console.Clear();
-                Console.WriteLine($"{Global.CurrentTime} Setup       Please enter your TWITCHAPI ID and press return.");
+                Console.WriteLine($"{Globals.CurrentTime} Setup       Please enter your TWITCHAPI ID and press return.");
                 string twitchapiID = Console.ReadLine();
                 Console.Clear();
-                Console.WriteLine($"{Global.CurrentTime} Setup       Please enter your TWITCHAPI TOKEN and press return.");
-                string twitchapiToken = Console.ReadLine();
+                Console.WriteLine($"{Globals.CurrentTime} Setup       Please enter your TWITCHAPI SECRET and press return.");
+                string twitchapiSecret = Console.ReadLine();
                 Console.Clear();
-                Console.WriteLine($"{Global.CurrentTime} Setup       Please enter your TWITCHAPI REFRESH TOKEN and press return.");
+                Console.WriteLine($"{Globals.CurrentTime} Setup       Please enter your TWITCHAPI REFRESH TOKEN and press return.");
                 string twitchapiRefreshToken = Console.ReadLine();
                 Console.Clear();
 
                 string data0 = AES.Encrypt(discordToken);
                 string data1 = AES.Encrypt(twitchapiID);
-                string data2 = AES.Encrypt(twitchapiToken);
+                string data2 = AES.Encrypt(twitchapiSecret);
                 string data3 = AES.Encrypt(twitchapiRefreshToken);
 
                 using (StreamWriter file = new StreamWriter(filename, true, Encoding.UTF8))
@@ -138,8 +138,8 @@ namespace BluBotCore.Services
                     file.Flush();
                     file.Close();
                 }
-                Console.WriteLine($"{Global.CurrentTime} Setup       File {filename} has been generated.");
-                Console.WriteLine($"{Global.CurrentTime} Setup       Please restart the program.");
+                Console.WriteLine($"{Globals.CurrentTime} Setup       File {filename} has been generated.");
+                Console.WriteLine($"{Globals.CurrentTime} Setup       Please restart the program.");
                 return false;
             }
         }

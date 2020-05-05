@@ -23,7 +23,7 @@ namespace BluBotCore.Modules.Commands
         [Command("version")]
         public async Task VersionAsync()
         {
-            await ReplyAsync($"V{Version.Major}.{Version.Minor}");
+            await ReplyAsync($"V{Version.Major}.{Version.Minor} > {Version.Build}");
         }
 
         //End application - ConsoleApp
@@ -112,12 +112,25 @@ namespace BluBotCore.Modules.Commands
             };
             eb.AddField(x =>
             {
-                x.Name = "Author";
+                x.Name = "**Author**";
                 x.Value = $"{application.Owner.Username} (ID {application.Owner.Id})";
+                x.IsInline = false;
             });
             eb.AddField(x =>
             {
-                x.Name = "Libraries Used";
+                x.Name = "**Version**";
+                x.Value = $"V{Version.Major}.{Version.Minor}";
+                x.IsInline = true;
+            });
+            eb.AddField(x =>
+            {
+                x.Name = "**Variant**";
+                x.Value = $"{Version.Build}";
+                x.IsInline = true;
+            });
+            eb.AddField(x =>
+            {
+                x.Name = "**Libraries**";
                 x.Value = "" +
                 $"Discord.Net ({DiscordConfig.Version})\n" +
                 "TwitchLib.API 3.1.3\n" +
@@ -127,26 +140,24 @@ namespace BluBotCore.Modules.Commands
             });
             eb.AddField(x =>
             {
-                x.Name = "Runtime";
+                x.Name = "**Runtime**";
                 x.Value = $"{RuntimeInformation.FrameworkDescription} {RuntimeInformation.OSArchitecture}";
-                x.IsInline = false;
+                x.IsInline = true;
             });
             eb.AddField(x =>
             {
-                x.Name = "Stats";
+                x.Name = "**Stats**";
                 x.Value = "" +
                 $"Heap Size: {GetHeapSize()} MB\n" +
                 $"Latency: {Context.Client.Latency}ms\n";
-                x.IsInline = false;
+                x.IsInline = true;
             });
             string guildsStr = "";
             foreach (SocketGuild guild in Context.Client.Guilds)
             {
-                guildsStr += $">\n{guild.Name} ({guild.Id})\n" +
-                    $"- Members = {guild.MemberCount}\n" +
-                    $"- Channels = {guild.Channels.Count}\n" +
-                    $"-- Voice = {guild.VoiceChannels.Count}\n" +
-                    $"-- Text = {guild.TextChannels.Count}\n" +
+                guildsStr += $"**{guild.Name}** ({guild.Id})\n" +
+                    $"- Members ({guild.MemberCount})\n" +
+                    $"- Channels ({guild.Channels.Count})>(V{guild.VoiceChannels.Count})(T{guild.TextChannels.Count})\n" +
                     $"- Roles = {guild.Roles.Count}\n" +
                     $"- Owner = {guild.Owner}({guild.OwnerId})\n";
             }
@@ -154,6 +165,7 @@ namespace BluBotCore.Modules.Commands
             {
                 x.Name = "**Guilds**";
                 x.Value = $"{guildsStr}";
+                x.IsInline = false;
             });
             eb.WithFooter(x =>
             {
@@ -382,6 +394,16 @@ namespace BluBotCore.Modules.Commands
         {
             string msg = $"Pong! - {Context.Client.Latency}ms";
             await ReplyAsync(msg);
+        }
+
+        
+        [Command("encrypt")]
+        [RequireContext(ContextType.DM)]
+        [RequireRoleOrID]
+        public async Task VerifyAsync(string entry)
+        {
+            string result = AES.Encrypt(entry);
+            await ReplyAsync(result);
         }
 
         private static string GetUptime()

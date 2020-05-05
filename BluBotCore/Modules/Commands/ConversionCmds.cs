@@ -53,52 +53,5 @@ namespace BluBotCore.Modules.Commands
             }
             await ReplyAsync(result);
         }
-
-        //[Command("time", RunMode = RunMode.Async)]
-        //[Summary("")]
-        //public async Task TimeAsync()
-        //{
-        //    await ReplyAsync("Please enter the time you want to convert " +
-        //        "followed by the before and after abbreivations of the timezones to be used.\n" +
-        //        "*Example usage: 08:20AM PDT CDT*");
-        //    string format = "h:mmtt";
-        //    SocketMessage response = await NextMessageAsync();
-        //    var result = response.Content.Split(' ');
-        //    if (result.Length != 3)
-        //    {
-        //        await ReplyAsync("You did not enter the required fields or you entered to many parameters, please try again.");
-        //        return;
-        //    }
-        //    var setTime = DateTime.ParseExact(result[0], format, CultureInfo.InvariantCulture);
-        //    if (String.IsNullOrEmpty(Timezones(result[1])) || String.IsNullOrEmpty(Timezones(result[2])))
-        //    {
-        //        await ReplyAsync(""); //Add abbreivation error
-        //    }
-        //    var beforeZone = TimeZoneInfo.FindSystemTimeZoneById(Timezones(result[1]));
-        //    var utcTime = TimeZoneInfo.ConvertTimeToUtc(setTime, beforeZone);
-        //    var afterZone = TimeZoneInfo.FindSystemTimeZoneById(Timezones(result[2]));
-        //    var time = TimeZoneInfo.ConvertTimeFromUtc(utcTime, afterZone);
-        //    await ReplyAsync($"" +
-        //        $"{beforeZone.DisplayName} -> {setTime.ToShortTimeString()}" +
-        //        $"\n" +
-        //        $"{afterZone.DisplayName} -> {time.ToShortTimeString()}");
-        //}
-
-        //private string Timezones(string zone)
-        //{
-        //    switch (zone.ToUpper())
-        //    {
-        //        case "IDL":
-        //            return "Dateline Standard Time";
-        //        case "HST":
-        //            return "Aleutian Standard Time";
-        //        case "AST":
-        //            return "Atlantic Standard Time";
-        //        case "PST":
-        //            return "Pacific Standard Time";
-        //        default:
-        //            return "";
-        //    }
-        //}
     }
 }

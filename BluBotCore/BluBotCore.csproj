@@ -40,9 +40,4 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Discord\" />
-    <Folder Include="Twitch\" />
-  </ItemGroup>
-
 </Project>

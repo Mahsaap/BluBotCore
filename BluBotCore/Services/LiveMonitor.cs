@@ -15,6 +15,7 @@ using TwitchLib.Api.V5.Models.Channels;
 using TwitchLib.Api.V5.Models.Teams;
 using TwitchLib.Api.Services;
 using TwitchLib.Api.Services.Events.LiveStreamMonitor;
+using BluBotCore.Global;
 
 namespace BluBotCore.Services
 {
@@ -70,7 +71,7 @@ namespace BluBotCore.Services
                 {
                     // Set Credentials in Twitch API Config.
                     API.Settings.ClientId = AES.Decrypt(Cred.TwitchAPIID);
-                    API.Settings.AccessToken = AES.Decrypt(Cred.TwitchAPIToken);
+                    API.Settings.Secret = AES.Decrypt(Cred.TwitchAPISecret);
                 }
                 catch (Exception ex)
                 {
@@ -82,9 +83,9 @@ namespace BluBotCore.Services
 
                         // Refresh Token
                         var token = await API.V5.Auth.RefreshAuthTokenAsync(
-                            AES.Decrypt(Cred.TwitchAPIRefreshToken), AES.Decrypt(Cred.TwitchAPIToken), AES.Decrypt(Cred.TwitchAPIID));
+                            AES.Decrypt(Cred.TwitchAPIRefreshToken), AES.Decrypt(Cred.TwitchAPISecret), AES.Decrypt(Cred.TwitchAPIID));
                         await mahsaap.SendMessageAsync("TwitchLib token has been refreshed.");
-                        
+
                         // Grab old credentials from file.
                         List<string> tmpList = new List<string>();
                         using (StreamReader file = new StreamReader("init.txt"))
@@ -97,7 +98,7 @@ namespace BluBotCore.Services
 
                         // Set new credentials to file.
                         tmpList[2] = AES.Encrypt(token.AccessToken);
-                        Cred.TwitchAPIToken = AES.Encrypt(token.AccessToken);
+                        Cred.TwitchAPISecret = AES.Encrypt(token.AccessToken);
                         tmpList[3] = AES.Encrypt(token.RefreshToken);
                         Cred.TwitchAPIRefreshToken = AES.Encrypt(token.RefreshToken);
 
@@ -108,15 +109,14 @@ namespace BluBotCore.Services
 
                         // Set Credentials in Twitch API Config.
                         API.Settings.ClientId = AES.Decrypt(Cred.TwitchAPIID);
-                        API.Settings.AccessToken = AES.Decrypt(Cred.TwitchAPIToken);
-                        Console.WriteLine($"{Global.CurrentTime} Monitor     Tokens have been refreshed and updated!");
-
+                        API.Settings.AccessToken = AES.Decrypt(Cred.TwitchAPISecret);
+                        Console.WriteLine($"{Globals.CurrentTime} Monitor     Tokens have been refreshed and updated!");
                     }
                 }
 
                 Monitor = new LiveStreamMonitorService(API, 300);
 
-                Console.WriteLine($"{Global.CurrentTime} Monitor     Instance Created");
+                Console.WriteLine($"{Globals.CurrentTime} Monitor     Instance Created");
 
                 await SetCastersAsync();
 
@@ -126,7 +126,7 @@ namespace BluBotCore.Services
                 Monitor.OnStreamUpdate += Monitor_OnStreamUpdateAsync;
                 Monitor.OnServiceStarted += Monitor_OnServiceStartedAsync;
                 Monitor.OnChannelsSet += Monitor_OnChannelsSet;
-                
+
                 Monitor.Start();
 
                 await Task.Delay(-1);
@@ -147,7 +147,7 @@ namespace BluBotCore.Services
                 EmbedBuilder eb = SetupLiveEmbed($":link: {ee.Stream.Channel.DisplayName}", ee.Stream.Channel.Status, ee.Stream.Channel.Game,
                     ee.Stream.Preview.Medium + Guid.NewGuid(), ee.Stream.Channel.Logo, url, ee.Stream.Viewers);
 
-                Console.WriteLine($"{Global.CurrentTime} Monitor     {ee.Stream.Channel.DisplayName} is live playing {ee.Stream.Game}");
+                Console.WriteLine($"{Globals.CurrentTime} Monitor     {ee.Stream.Channel.DisplayName} is live playing {ee.Stream.Game}");
 
                 await Task.Delay(1000);
                 await SetupEmbedMessageAsync(eb, ee, null);
@@ -162,7 +162,7 @@ namespace BluBotCore.Services
         private async void Monitor_OnStreamOfflineAsync(object sender, OnStreamOfflineArgs e)
         {
             var ee = await API.V5.Channels.GetChannelByIDAsync(e.Channel);
-            Console.WriteLine($"{Global.CurrentTime} Monitor     {ee.DisplayName} is offline");
+            Console.WriteLine($"{Globals.CurrentTime} Monitor     {ee.DisplayName} is offline");
 
             if (_liveEmbeds.ContainsKey(e.Channel))
             {
@@ -192,7 +192,7 @@ namespace BluBotCore.Services
 
                             await UpdateNotificationAsync(eb, _liveEmbeds, e);
 
-                            Console.WriteLine($"{Global.CurrentTime} Monitor     Stream {ee.Stream.Channel.DisplayName} updated");
+                            Console.WriteLine($"{Globals.CurrentTime} Monitor     Stream {ee.Stream.Channel.DisplayName} updated");
                             await Task.Delay(500);
                         }
                     }
@@ -207,7 +207,7 @@ namespace BluBotCore.Services
         private async void Monitor_OnServiceStartedAsync(object sender, TwitchLib.Api.Services.Events.OnServiceStartedArgs e)
         {
             _botOnlineTime = DateTime.Now;
-            Console.WriteLine($"{Global.CurrentTime} Monitor     Started");
+            Console.WriteLine($"{Globals.CurrentTime} Monitor     Started");
             _liveEmbeds.Clear();
 
             var livestreamers = await API.V5.Streams.GetLiveStreamsAsync(Monitor.ChannelsToMonitor);
@@ -237,16 +237,16 @@ namespace BluBotCore.Services
                     EmbedBuilder eb = SetupLiveEmbed($":link: {xx.Stream.Channel.DisplayName}", xx.Stream.Channel.Status, xx.Stream.Channel.Game,
                     xx.Stream.Preview.Medium + Guid.NewGuid().ToString(), xx.Stream.Channel.Logo, @"https://www.twitch.tv/" + xx.Stream.Channel.Name, xx.Stream.Viewers);
 
-                    Console.WriteLine($"{Global.CurrentTime} Monitor     {xx.Stream.Channel.DisplayName} is live playing {xx.Stream.Game}");
+                    Console.WriteLine($"{Globals.CurrentTime} Monitor     {xx.Stream.Channel.DisplayName} is live playing {xx.Stream.Game}");
                     await Task.Delay(1000);
                     await SetupEmbedMessageAsync(eb, null, xx.Stream);
                 }
             }
         }
 
-        private void Monitor_OnChannelsSet(object sender, TwitchLib.Api.Services.Events.OnChannelsSetArgs e)       
+        private void Monitor_OnChannelsSet(object sender, TwitchLib.Api.Services.Events.OnChannelsSetArgs e)
         {
-            Console.WriteLine($"{Global.CurrentTime} Monitor     Streams Set!");
+            Console.WriteLine($"{Globals.CurrentTime} Monitor     Streams Set!");
         }
 
         private async Task UpdateNotificationAsync(EmbedBuilder eb, ConcurrentDictionary<string, Tuple<RestUserMessage, string, string, int>> lst, OnStreamUpdateArgs e)
@@ -263,9 +263,9 @@ namespace BluBotCore.Services
         private EmbedBuilder SetupLiveEmbed(string title, string description, string game, string image, string thumbnail, string url, int vCount)
         {
 
-            title = Global.NullEmptyCheck(title);
-            description = Global.NullEmptyCheck(description);
-            game = Global.NullEmptyCheck(game);
+            title = Globals.NullEmptyCheck(title);
+            description = Globals.NullEmptyCheck(description);
+            game = Globals.NullEmptyCheck(game);
 
             EmbedBuilder eb = new EmbedBuilder()
             {
@@ -298,18 +298,26 @@ namespace BluBotCore.Services
 
         private async Task SetCastersAsync()
         {
-            Team team = await API.V5.Teams.GetTeamAsync("wyktv");
-
-            foreach (Channel user in team.Users)
+            if (Version.Build == BuildType.WYK.Value)
             {
-                MonitoredChannels.Add(user.DisplayName, user.Id);
+                Team team = await API.V5.Teams.GetTeamAsync("wyktv");
+
+                foreach (Channel user in team.Users)
+                {
+                    MonitoredChannels.Add(user.DisplayName, user.Id);
+                }
+            }
+            else if (Version.Build == BuildType.OBG.Value)
+            {
+                var chan = await API.Helix.Users.GetUsersAsync(logins: new List<string> { "overboredgaming" });
+                MonitoredChannels.Add(chan.Users[0].DisplayName, chan.Users[0].Id);
             }
             Monitor.SetChannelsById(MonitoredChannels.Values.ToList());
         }
 
         public async Task<bool> UpdateMonitorAsync(string channel = null)
         {
-            if (channel == null) { 
+            if (channel == null) {
                 Monitor.Stop();
                 MonitoredChannels.Clear();
                 await SetCastersAsync();
@@ -337,7 +345,7 @@ namespace BluBotCore.Services
                             await msg.Item1.ModifyAsync(x => x.Embed = eb.Build());
                             _liveEmbeds[channelID] = new Tuple<RestUserMessage, string, string,int>(msg.Item1, ee.Stream.Channel.Status, ee.Stream.Channel.Game, ee.Stream.Viewers);
 
-                            Console.WriteLine($"{Global.CurrentTime} Monitor     Stream {ee.Stream.Channel.DisplayName} updated");
+                            Console.WriteLine($"{Globals.CurrentTime} Monitor     Stream {ee.Stream.Channel.DisplayName} updated");
                             return true;
                         }
                     }
@@ -355,7 +363,7 @@ namespace BluBotCore.Services
             var user = await API.V5.Users.GetUserByNameAsync(channel);
             string channelID = user.Matches[0].Id;
             var ee = await API.V5.Channels.GetChannelByIDAsync(channelID);
-            Console.WriteLine($"{Global.CurrentTime} Monitor     {ee.DisplayName} was removed manually.");
+            Console.WriteLine($"{Globals.CurrentTime} Monitor     {ee.DisplayName} was removed manually.");
 
             if (_liveEmbeds.ContainsKey(channelID))
             {
@@ -364,7 +372,7 @@ namespace BluBotCore.Services
                 if (_client.ConnectionState == ConnectionState.Connected)
                     await embed.DeleteAsync();
                 _liveEmbeds.TryRemove(channelID, out Tuple<RestUserMessage, string, string, int> outResult);
-                Console.WriteLine($"{Global.CurrentTime} Monitor     TryParse OutResult: {outResult}");
+                Console.WriteLine($"{Globals.CurrentTime} Monitor     TryParse OutResult: {outResult}");
                 return true;
             }
             return false;
@@ -423,8 +431,8 @@ namespace BluBotCore.Services
                     }
                     if (hash.SequenceEqual(Twitch.TwitchPinkScreenChecksum))
                     {
-                        //pink screen detected. Lets sleep for X seconds and try again. 
-                        Console.WriteLine($"{DateTime.Now.ToString("HH:MM:ss")} Twitch       Detected Pink Screen for {url}, trying again in {Twitch.TwitchPinkScreenRetryDelay}, attempt {i + 1} out of {Twitch.TwitchPinkScreenRetryAttempts}");
+                        //pink screen detected. Lets sleep for X seconds and try again.
+                        Console.WriteLine($"{DateTime.Now:HH:MM:ss} Twitch       Detected Pink Screen for {url}, trying again in {Twitch.TwitchPinkScreenRetryDelay}, attempt {i + 1} out of {Twitch.TwitchPinkScreenRetryAttempts}");
                         await Task.Delay(Twitch.TwitchPinkScreenRetryDelay);
                         image = webClient.DownloadData(url);
                         image = webClient.DownloadData(url);

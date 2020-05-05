@@ -2,13 +2,13 @@
 
 namespace BluBotCore
 {
-    static class Global
+    static class Globals
     {
         public static string CurrentTime { get { return DateTime.Now.ToString("HH:mm:ss"); } }
 
         public static string NullEmptyCheck(string entry)
         {
-            if (!String.IsNullOrEmpty(entry))
+            if (!string.IsNullOrEmpty(entry))
             {
                 return entry;
             }

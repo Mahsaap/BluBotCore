@@ -9,13 +9,13 @@ namespace BluBotCore.Other
     {
         public static string Encrypt(string entry)
         {
-            string temp = EncryptStringToBase64String(entry, Crypt.key);
+            string temp = EncryptStringToBase64String(entry, Crypt.Key);
             return temp;
         }
 
-        public static string Decrypt(String entry)
+        public static string Decrypt(string entry)
         {
-            string temp = DecryptStringFromBase64String(entry, Crypt.key);
+            string temp = DecryptStringFromBase64String(entry, Crypt.Key);
             return temp;
         }
 
@@ -34,24 +34,20 @@ namespace BluBotCore.Other
                 if (string.IsNullOrEmpty(plainText))
                     return Convert.ToBase64String(iv);
                 ICryptoTransform encryptor = aes.CreateEncryptor(Key, iv);
-                using (MemoryStream msEncrypt = new MemoryStream())
+                using MemoryStream msEncrypt = new MemoryStream();
+                using CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write);
+                using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
                 {
-                    using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
-                    {
-                        using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
-                        {
-                            swEncrypt.Write(plainText);
-                        }
-                        byte[] encrypted = msEncrypt.ToArray();
-                        returnValue = new byte[encrypted.Length + iv.Length];
-                        Array.Copy(iv, returnValue, iv.Length);
-                        Array.Copy(encrypted, 0, returnValue, iv.Length, encrypted.Length);
-                    }
+                    swEncrypt.Write(plainText);
                 }
+                byte[] encrypted = msEncrypt.ToArray();
+                returnValue = new byte[encrypted.Length + iv.Length];
+                Array.Copy(iv, returnValue, iv.Length);
+                Array.Copy(encrypted, 0, returnValue, iv.Length, encrypted.Length);
             }
             return Convert.ToBase64String(returnValue);
         }
-        
+
         static string DecryptStringFromBase64String(string cipherText, byte[] Key)
         {
             if (string.IsNullOrEmpty(cipherText))
@@ -71,16 +67,10 @@ namespace BluBotCore.Other
                 byte[] cipherBytes = new byte[allBytes.Length - iv.Length];
                 Array.Copy(allBytes, iv.Length, cipherBytes, 0, cipherBytes.Length);
                 ICryptoTransform decryptor = aes.CreateDecryptor(Key, iv);
-                using (MemoryStream msDecrypt = new MemoryStream(cipherBytes))
-                {
-                    using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
-                    {
-                        using (StreamReader srDecrypt = new StreamReader(csDecrypt))
-                        {
-                            plaintext = srDecrypt.ReadToEnd();
-                        }
-                    }
-                }
+                using MemoryStream msDecrypt = new MemoryStream(cipherBytes);
+                using CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read);
+                using StreamReader srDecrypt = new StreamReader(csDecrypt);
+                plaintext = srDecrypt.ReadToEnd();
             }
             return plaintext;
         }

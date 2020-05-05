@@ -50,8 +50,8 @@ namespace BluBotCore.Modules.Commands
         public async Task WYKStreamers()
         {
             string result = "**Would You Kindly - Team**\n";
-            var staff = Context.Guild.GetRole(Setup.DiscordWYKTVRole).Members;
-            foreach (SocketGuildUser user in staff)
+            var team = Context.Guild.GetRole(Setup.DiscordWYKTVRole).Members;
+            foreach (SocketGuildUser user in team)
             {
                 result += $"*{user.Username}*\n";
             }
