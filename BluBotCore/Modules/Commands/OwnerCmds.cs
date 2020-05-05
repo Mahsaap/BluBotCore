@@ -39,12 +39,6 @@ namespace BluBotCore.Modules.Commands
             File.WriteAllLines(filename, tempLst);
         }
 
-        //[Command("egg")]
-        //public void EggAsync()
-        //{
-        //    EasterEggsHandler.easterEggEnable = !EasterEggsHandler.easterEggEnable;
-        //}
-
         [Command("encrypt")]
         [RequireContext(ContextType.DM)]
         public async Task VerifyAsync(string entry)
