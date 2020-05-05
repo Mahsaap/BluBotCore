@@ -71,7 +71,7 @@ namespace BluBotCore.Services
                 {
                     // Set Credentials in Twitch API Config.
                     API.Settings.ClientId = AES.Decrypt(Cred.TwitchAPIID);
-                    API.Settings.AccessToken = AES.Decrypt(Cred.TwitchAPIToken);
+                    API.Settings.Secret = AES.Decrypt(Cred.TwitchAPISecret);
                 }
                 catch (Exception ex)
                 {
@@ -83,7 +83,7 @@ namespace BluBotCore.Services
 
                         // Refresh Token
                         var token = await API.V5.Auth.RefreshAuthTokenAsync(
-                            AES.Decrypt(Cred.TwitchAPIRefreshToken), AES.Decrypt(Cred.TwitchAPIToken), AES.Decrypt(Cred.TwitchAPIID));
+                            AES.Decrypt(Cred.TwitchAPIRefreshToken), AES.Decrypt(Cred.TwitchAPISecret), AES.Decrypt(Cred.TwitchAPIID));
                         await mahsaap.SendMessageAsync("TwitchLib token has been refreshed.");
 
                         // Grab old credentials from file.
@@ -98,7 +98,7 @@ namespace BluBotCore.Services
 
                         // Set new credentials to file.
                         tmpList[2] = AES.Encrypt(token.AccessToken);
-                        Cred.TwitchAPIToken = AES.Encrypt(token.AccessToken);
+                        Cred.TwitchAPISecret = AES.Encrypt(token.AccessToken);
                         tmpList[3] = AES.Encrypt(token.RefreshToken);
                         Cred.TwitchAPIRefreshToken = AES.Encrypt(token.RefreshToken);
 
@@ -109,9 +109,8 @@ namespace BluBotCore.Services
 
                         // Set Credentials in Twitch API Config.
                         API.Settings.ClientId = AES.Decrypt(Cred.TwitchAPIID);
-                        API.Settings.AccessToken = AES.Decrypt(Cred.TwitchAPIToken);
+                        API.Settings.AccessToken = AES.Decrypt(Cred.TwitchAPISecret);
                         Console.WriteLine($"{Globals.CurrentTime} Monitor     Tokens have been refreshed and updated!");
-
                     }
                 }
 
@@ -299,7 +298,7 @@ namespace BluBotCore.Services
 
         private async Task SetCastersAsync()
         {
-            if (Version.Build == BuildType.WYK)
+            if (Version.Build == BuildType.WYK.Value)
             {
                 Team team = await API.V5.Teams.GetTeamAsync("wyktv");
 
@@ -308,9 +307,9 @@ namespace BluBotCore.Services
                     MonitoredChannels.Add(user.DisplayName, user.Id);
                 }
             }
-            else if (Version.Build == BuildType.OBG)
+            else if (Version.Build == BuildType.OBG.Value)
             {
-                var chan = await API.Helix.Users.GetUsersAsync(logins: new List<string> { "Overboredgaming" });
+                var chan = await API.Helix.Users.GetUsersAsync(logins: new List<string> { "overboredgaming" });
                 MonitoredChannels.Add(chan.Users[0].DisplayName, chan.Users[0].Id);
             }
             Monitor.SetChannelsById(MonitoredChannels.Values.ToList());

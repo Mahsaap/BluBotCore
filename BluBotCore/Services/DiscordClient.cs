@@ -103,7 +103,7 @@ namespace BluBotCore.Services
                 }
                 Cred.DiscordTok = tmpList[0];
                 Cred.TwitchAPIID = tmpList[1];
-                Cred.TwitchAPIToken = tmpList[2];
+                Cred.TwitchAPISecret = tmpList[2];
                 Cred.TwitchAPIRefreshToken = tmpList[3];
                 Console.WriteLine($"{Globals.CurrentTime} Setup       File {filename} loaded!");
                 return true;
@@ -118,7 +118,7 @@ namespace BluBotCore.Services
                 string twitchapiID = Console.ReadLine();
                 Console.Clear();
                 Console.WriteLine($"{Globals.CurrentTime} Setup       Please enter your TWITCHAPI TOKEN and press return.");
-                string twitchapiToken = Console.ReadLine();
+                string twitchapiSecret = Console.ReadLine();
                 Console.Clear();
                 Console.WriteLine($"{Globals.CurrentTime} Setup       Please enter your TWITCHAPI REFRESH TOKEN and press return.");
                 string twitchapiRefreshToken = Console.ReadLine();
@@ -126,7 +126,7 @@ namespace BluBotCore.Services
 
                 string data0 = AES.Encrypt(discordToken);
                 string data1 = AES.Encrypt(twitchapiID);
-                string data2 = AES.Encrypt(twitchapiToken);
+                string data2 = AES.Encrypt(twitchapiSecret);
                 string data3 = AES.Encrypt(twitchapiRefreshToken);
 
                 using (StreamWriter file = new StreamWriter(filename, true, Encoding.UTF8))
