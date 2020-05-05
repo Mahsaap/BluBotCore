@@ -8,7 +8,7 @@ namespace BluBotCore
 
         public static string NullEmptyCheck(string entry)
         {
-            if (!String.IsNullOrEmpty(entry))
+            if (!string.IsNullOrEmpty(entry))
             {
                 return entry;
             }
