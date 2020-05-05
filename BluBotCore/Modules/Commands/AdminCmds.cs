@@ -396,6 +396,16 @@ namespace BluBotCore.Modules.Commands
             await ReplyAsync(msg);
         }
 
+        
+        [Command("encrypt")]
+        [RequireContext(ContextType.DM)]
+        [RequireRoleOrID]
+        public async Task VerifyAsync(string entry)
+        {
+            string result = AES.Encrypt(entry);
+            await ReplyAsync(result);
+        }
+
         private static string GetUptime()
         => (DateTime.Now - Process.GetCurrentProcess().StartTime).ToString(@"dd\.hh\:mm\:ss");
         private static string GetHeapSize() => Math.Round(GC.GetTotalMemory(true) / (1024.0 * 1024.0), 2).ToString();
