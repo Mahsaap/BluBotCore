@@ -13,7 +13,7 @@ namespace BluBotCore.Other
             return temp;
         }
 
-        public static string Decrypt(String entry)
+        public static string Decrypt(string entry)
         {
             string temp = DecryptStringFromBase64String(entry, Crypt.Key);
             return temp;
