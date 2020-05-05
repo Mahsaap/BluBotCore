@@ -117,7 +117,7 @@ namespace BluBotCore.Services
                 Console.WriteLine($"{Globals.CurrentTime} Setup       Please enter your TWITCHAPI ID and press return.");
                 string twitchapiID = Console.ReadLine();
                 Console.Clear();
-                Console.WriteLine($"{Globals.CurrentTime} Setup       Please enter your TWITCHAPI TOKEN and press return.");
+                Console.WriteLine($"{Globals.CurrentTime} Setup       Please enter your TWITCHAPI SECRET and press return.");
                 string twitchapiSecret = Console.ReadLine();
                 Console.Clear();
                 Console.WriteLine($"{Globals.CurrentTime} Setup       Please enter your TWITCHAPI REFRESH TOKEN and press return.");
