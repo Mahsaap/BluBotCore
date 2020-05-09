@@ -29,6 +29,7 @@ namespace BluBotCore.Services
             /// <summary> Time the bot comes online. This is used to not tweet / @everyone current online streamers on load. </summary>
             private static DateTime _botOnlineTime;
 
+            static DateTime LastTeamCheck;
             /// <summary> Dictionary of all the live discord messages. Concurrent since this can be added/removed from at anytime. </summary>
             public static ConcurrentDictionary<string, Tuple<RestUserMessage,string,string,int>> _liveEmbeds = new ConcurrentDictionary<string, Tuple<RestUserMessage,string,string,int>>();
 
@@ -177,36 +178,59 @@ namespace BluBotCore.Services
 
         private async void Monitor_OnStreamUpdateAsync(object sender, OnStreamUpdateArgs e)
         {
-            try {
-                var ee = await API.V5.Streams.GetStreamByUserAsync(e.Channel);
-                if (_liveEmbeds.ContainsKey(e.Channel))
+            if (DateTime.Now > LastTeamCheck.AddDays(1))
+            {
+
+                var teamTemp = await API.V5.Teams.GetTeamAsync("wyktv");
+                // Check Team Count
+                if (teamTemp.Users.Length != MonitoredChannels.Count)
                 {
-                    if (_client.ConnectionState == ConnectionState.Connected)
+                    await UpdateMonitorAsync();
+                    return;
+                }
+                else
+                {
+                    // Check Name Change
+                    int count = 0;
+                    var result = MonitoredChannels.Where(p => teamTemp.Users.All(p2 => p2.Id != p.Value));
+                    foreach (var r in result)
                     {
-                        if (Setup.DiscordAnnounceChannel == 0) return;
-                        var msg = _liveEmbeds[e.Channel];
-                        if (msg.Item2 != ee.Stream.Channel.Status || msg.Item3 != ee.Stream.Channel.Game || msg.Item4 != ee.Stream.Viewers)
-                        {
-                            EmbedBuilder eb = SetupLiveEmbed($":link: {ee.Stream.Channel.DisplayName}", $"{ee.Stream.Channel.Status}", $"{ee.Stream.Channel.Game}",
-                                ee.Stream.Preview.Medium + Guid.NewGuid().ToString(), ee.Stream.Channel.Logo, @"https://www.twitch.tv/" + ee.Stream.Channel.Name, ee.Stream.Viewers);
+                        count++;
+                    }
+                    if (count > 0)
+                    {
+                        await UpdateMonitorAsync();
+                        return;
+                    } 
+                }
+                LastTeamCheck = DateTime.Now;
+            }
 
-                            await UpdateNotificationAsync(eb, _liveEmbeds, e);
+            var ee = await API.V5.Streams.GetStreamByUserAsync(e.Channel);
+            if (_liveEmbeds.ContainsKey(e.Channel))
+            {
+                if (_client.ConnectionState == ConnectionState.Connected)
+                {
+                    if (Setup.DiscordAnnounceChannel == 0) return;
+                    var msg = _liveEmbeds[e.Channel];
+                    if (msg.Item2 != ee.Stream.Channel.Status || msg.Item3 != ee.Stream.Channel.Game || msg.Item4 != ee.Stream.Viewers)
+                    {
+                        EmbedBuilder eb = SetupLiveEmbed($":link: {ee.Stream.Channel.DisplayName}", $"{ee.Stream.Channel.Status}", $"{ee.Stream.Channel.Game}",
+                            ee.Stream.Preview.Medium + Guid.NewGuid().ToString(), ee.Stream.Channel.Logo, @"https://www.twitch.tv/" + ee.Stream.Channel.Name, ee.Stream.Viewers);
 
-                            Console.WriteLine($"{Globals.CurrentTime} Monitor     Stream {ee.Stream.Channel.DisplayName} updated");
-                            await Task.Delay(500);
-                        }
+                        await UpdateNotificationAsync(eb, _liveEmbeds, e);
+
+                        Console.WriteLine($"{Globals.CurrentTime} Monitor     Stream {ee.Stream.Channel.DisplayName} updated");
+                        await Task.Delay(500);
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
             }
         }
 
         private async void Monitor_OnServiceStartedAsync(object sender, TwitchLib.Api.Services.Events.OnServiceStartedArgs e)
         {
             _botOnlineTime = DateTime.Now;
+
             Console.WriteLine($"{Globals.CurrentTime} Monitor     Started");
             _liveEmbeds.Clear();
 
@@ -298,6 +322,7 @@ namespace BluBotCore.Services
 
         private async Task SetCastersAsync()
         {
+            LastTeamCheck = DateTime.Now;
             if (Version.Build == BuildType.WYK.Value)
             {
                 Team team = await API.V5.Teams.GetTeamAsync("wyktv");
