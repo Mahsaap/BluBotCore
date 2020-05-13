@@ -178,32 +178,35 @@ namespace BluBotCore.Services
 
         private async void Monitor_OnStreamUpdateAsync(object sender, OnStreamUpdateArgs e)
         {
-            if (DateTime.Now > LastTeamCheck.AddDays(1))
+            if (Version.Build == BuildType.WYK.Value)
             {
+                if (DateTime.Now > LastTeamCheck.AddDays(1))
+                {
 
-                var teamTemp = await API.V5.Teams.GetTeamAsync("wyktv");
-                // Check Team Count
-                if (teamTemp.Users.Length != MonitoredChannels.Count)
-                {
-                    await UpdateMonitorAsync();
-                    return;
-                }
-                else
-                {
-                    // Check Name Change
-                    int count = 0;
-                    var result = MonitoredChannels.Where(p => teamTemp.Users.All(p2 => p2.Id != p.Value));
-                    foreach (var r in result)
-                    {
-                        count++;
-                    }
-                    if (count > 0)
+                    var teamTemp = await API.V5.Teams.GetTeamAsync("wyktv");
+                    // Check Team Count
+                    if (teamTemp.Users.Length != MonitoredChannels.Count)
                     {
                         await UpdateMonitorAsync();
                         return;
-                    } 
+                    }
+                    else
+                    {
+                        // Check Name Change
+                        int count = 0;
+                        var result = MonitoredChannels.Where(p => teamTemp.Users.All(p2 => p2.Id != p.Value));
+                        foreach (var r in result)
+                        {
+                            count++;
+                        }
+                        if (count > 0)
+                        {
+                            await UpdateMonitorAsync();
+                            return;
+                        }
+                    }
+                    LastTeamCheck = DateTime.Now;
                 }
-                LastTeamCheck = DateTime.Now;
             }
 
             var ee = await API.V5.Streams.GetStreamByUserAsync(e.Channel);
