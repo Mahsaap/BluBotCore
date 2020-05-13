@@ -1,4 +1,5 @@
 ﻿using BluBotCore.Other;
+using BluBotCore.Preconditions;
 using Discord.Commands;
 using Discord.WebSocket;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ namespace BluBotCore.Modules.Commands
 {
     [Name("WYK")]
     [Group("wyk")]
+    [RequireWYKBuild]
     public class WYKCmds : ModuleBase<SocketCommandContext>
     {
         [Command("social")]
