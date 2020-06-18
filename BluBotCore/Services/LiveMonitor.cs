@@ -341,7 +341,7 @@ namespace BluBotCore.Services
                 x.Value = vCount;
                 x.IsInline = true;
             });
-            eb.WithImageUrl(ImageCheck(image).Result);
+            eb.WithImageUrl(image);
             eb.WithThumbnailUrl(thumbnail);
             eb.WithFooter(x =>
             {
@@ -495,47 +495,47 @@ namespace BluBotCore.Services
             await Task.CompletedTask;
         }
 
-        private async Task<string> ImageCheck(string url)
-        {
-            WebClient webClient = new WebClient();
-            try
-            {
-                byte[] image = webClient.DownloadData(url);
+        //private async Task<string> ImageCheck(string url)
+        //{
+        //    WebClient webClient = new WebClient();
+        //    try
+        //    {
+        //        byte[] image = webClient.DownloadData(url);
 
-                for (int i = 0; i < Twitch.TwitchPinkScreenRetryAttempts; i++)
-                {
-                    byte[] hash;
-                    using (var sha256 = System.Security.Cryptography.SHA256.Create())
-                    {
-                        hash = sha256.ComputeHash(image);
-                    }
-                    if (hash.SequenceEqual(Twitch.TwitchPinkScreenChecksum))
-                    {
-                        //pink screen detected. Lets sleep for X seconds and try again.
-                        Console.WriteLine($"{DateTime.Now:HH:MM:ss} Twitch       Detected Pink Screen for {url}, trying again in {Twitch.TwitchPinkScreenRetryDelay}, attempt {i + 1} out of {Twitch.TwitchPinkScreenRetryAttempts}");
-                        await Task.Delay(Twitch.TwitchPinkScreenRetryDelay);
-                        image = webClient.DownloadData(url);
-                        image = webClient.DownloadData(url);
-                    }
-                    else
-                    {
-                        //not a pink screen. Break out of loop
-                        return url;
-                    }
-                }
-                return url;
-            }
-            catch (Exception ex)
-            {
-                var mahsaap = _client.GetUser(DiscordIDs.Mahsaap) as IUser;
-                await mahsaap.SendMessageAsync(ex.Message + "\n" + ex.StackTrace);
-                //cannot return null - code checks for length > 1
-                return "";
-            }
-            finally
-            {
-                webClient.Dispose();
-            }
-        }
+        //        for (int i = 0; i < Twitch.TwitchPinkScreenRetryAttempts; i++)
+        //        {
+        //            byte[] hash;
+        //            using (var sha256 = System.Security.Cryptography.SHA256.Create())
+        //            {
+        //                hash = sha256.ComputeHash(image);
+        //            }
+        //            if (hash.SequenceEqual(Twitch.TwitchPinkScreenChecksum))
+        //            {
+        //                //pink screen detected. Lets sleep for X seconds and try again.
+        //                Console.WriteLine($"{DateTime.Now:HH:MM:ss} Twitch       Detected Pink Screen for {url}, trying again in {Twitch.TwitchPinkScreenRetryDelay}, attempt {i + 1} out of {Twitch.TwitchPinkScreenRetryAttempts}");
+        //                await Task.Delay(Twitch.TwitchPinkScreenRetryDelay);
+        //                image = webClient.DownloadData(url);
+        //                image = webClient.DownloadData(url);
+        //            }
+        //            else
+        //            {
+        //                //not a pink screen. Break out of loop
+        //                return url;
+        //            }
+        //        }
+        //        return url;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        var mahsaap = _client.GetUser(DiscordIDs.Mahsaap) as IUser;
+        //        await mahsaap.SendMessageAsync(ex.Message + "\n" + ex.StackTrace);
+        //        //cannot return null - code checks for length > 1
+        //        return "";
+        //    }
+        //    finally
+        //    {
+        //        webClient.Dispose();
+        //    }
+        //}
     }
 }
