@@ -46,22 +46,10 @@ namespace BluBotCore.Handlers.Discord
 
             if (msg.Severity == LogSeverity.Error || msg.Severity == LogSeverity.Warning || msg.Severity == LogSeverity.Critical)
             {
-                string msge = msg.ToString();                
+                string msge = msg.ToString();
                 if (msg.Message != null && msg.Exception != null && msg.Exception.InnerException != null) {
-                    try
-                    {
-                        IMessageChannel chan;
-                        if (Debugger.IsAttached)
-                            chan = _client.GetChannel(DiscordIDs.DebugLogsTest) as IMessageChannel;
-                        else
-                            chan = _client.GetChannel(DiscordIDs.DebugLogsWYK) as IMessageChannel;
-                        await chan.SendMessageAsync(msge);
-                    }
-                    catch
-                    {
-                        var mahsaap = _client.GetUser(88798728948809728) as IUser;
-                        await mahsaap.SendMessageAsync(msge);
-                    }
+                    var mahsaap = _client.GetUser(88798728948809728) as IUser;
+                    await mahsaap.SendMessageAsync(msge);
                 }
             }
             Console.WriteLine(msg.ToString());
