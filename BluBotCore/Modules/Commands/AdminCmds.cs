@@ -133,7 +133,7 @@ namespace BluBotCore.Modules.Commands
                 x.Name = "**Libraries**";
                 x.Value = "" +
                 $"Discord.Net ({DiscordConfig.Version})\n" +
-                "TwitchLib.API 3.1.3\n" +
+                "TwitchLib.API 3.1.4\n" +
                 "StrawPollNet 1.0.2\n" +
                 "SteamStoreQuery 1.0.4";
                 x.IsInline = false;
