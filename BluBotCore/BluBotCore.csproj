@@ -4,9 +4,6 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <LangVersion>latest</LangVersion>
-    <PublishSingleFile>false</PublishSingleFile>
-    <PublishTrimmed>true</PublishTrimmed>
-    <TieredCompilationQuickJit>true</TieredCompilationQuickJit>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -32,7 +29,7 @@
     <PackageReference Include="SteamStoreQuery" Version="1.0.4" />
     <PackageReference Include="StrawPollNET" Version="1.0.2" />
     <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.1" />
-    <PackageReference Include="TwitchLib.Api" Version="3.1.3" />
+    <PackageReference Include="TwitchLib.Api" Version="3.1.4-CI-20200621-15" />
   </ItemGroup>
 
   <ItemGroup>
