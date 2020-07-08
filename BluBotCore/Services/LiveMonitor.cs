@@ -168,14 +168,26 @@ namespace BluBotCore.Services
                 var ee = await API.V5.Channels.GetChannelByIDAsync(e.Channel);
                 Console.WriteLine($"{Globals.CurrentTime} Monitor     {ee.DisplayName} is offline");
 
-                if (_liveEmbeds.ContainsKey(e.Channel))
+                if (_liveEmbeds.ContainsKey(e.Channel) && _client.ConnectionState == ConnectionState.Connected)
                 {
-                    await Task.Delay(250);
-                    RestUserMessage embed = _liveEmbeds[e.Channel].Item1;
-                    if (_client.ConnectionState == ConnectionState.Connected)
+                    if (Version.Build == BuildType.OBG.Value)
+                    {
+                        RestUserMessage embed = _liveEmbeds[e.Channel].Item1;
+                        string text = "**No, OverBoredGaming is not live!**\n" +
+                            "But you can check out the rest of the WYK Team!\n" +
+                            "https://www.twitch.tv/team/wyktv";
+                        await embed.ModifyAsync(x => x.Content = text);
+                        await embed.ModifyAsync(x => x.Embed = null);
+                    }
+                    if (Version.Build == BuildType.WYK.Value)
+                    {
+                        await Task.Delay(250);
+                        RestUserMessage embed = _liveEmbeds[e.Channel].Item1;
                         await embed.DeleteAsync();
-                    _ = _liveEmbeds.TryRemove(e.Channel, out _);
-                    // Console.WriteLine($"{Global.CurrentTime} Monitor     TryParse OutResult: {outResult}");
+                        _ = _liveEmbeds.TryRemove(e.Channel, out _);
+                        // Console.WriteLine($"{Global.CurrentTime} Monitor     TryParse OutResult: {outResult}");
+                    }
+
                 }
             }
             catch (Exception ex)
@@ -473,9 +485,17 @@ namespace BluBotCore.Services
                 if (_client.ConnectionState == ConnectionState.Connected)
                 {
                     string here = "";
-                    if (_botOnlineTime.AddSeconds(30) <= DateTime.Now) here = "@here ";
-                    here += $"\nTwitch (*{twitchURL}*)";
-                    here = here.Insert(0, $"**{channelName} is live!** ");
+                    if (Version.Build == BuildType.OBG.Value)
+                    {
+                        here += $"Yes, **{channelName} is live!**\n" +
+                            $"Twitch(*{twitchURL}*)";
+                    }
+                    else
+                    {
+                        if (_botOnlineTime.AddSeconds(30) <= DateTime.Now) here = "@here ";
+                        here += $"\nTwitch (*{twitchURL}*)";
+                        here = here.Insert(0, $"**{channelName} is live!** ");
+                    }
 
                     await SendEmbedAsync(Setup.DiscordAnnounceChannel, eb, here, channelID, status, game, vCount);
                 }
