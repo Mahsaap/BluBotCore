@@ -144,7 +144,17 @@ namespace BluBotCore.Services
             {
                 var ee = await API.V5.Streams.GetStreamByUserAsync(e.Channel);
 
-                if (!_liveEmbeds.ContainsKey(ee.Stream.Channel.Id)){
+                if (Version.Build == BuildType.OBG.Value)
+                {
+                    if (_liveEmbeds.ContainsKey(e.Channel) && _client.ConnectionState == ConnectionState.Connected)
+                    {
+                        RestUserMessage embed = _liveEmbeds[e.Channel].Item1;
+                        await embed.DeleteAsync();
+                        _ = _liveEmbeds.TryRemove(e.Channel, out _);
+                    }
+                }
+                if (!_liveEmbeds.ContainsKey(ee.Stream.Channel.Id) && _client.ConnectionState == ConnectionState.Connected)
+                {
                     string url = @"https://www.twitch.tv/" + ee.Stream.Channel.Name;
                     EmbedBuilder eb = SetupLiveEmbed($":link: {ee.Stream.Channel.DisplayName}", ee.Stream.Channel.Status, ee.Stream.Channel.Game,
                         ee.Stream.Preview.Medium + Guid.NewGuid(), ee.Stream.Channel.Logo, url, ee.Stream.Viewers);
@@ -175,8 +185,9 @@ namespace BluBotCore.Services
                         RestUserMessage embed = _liveEmbeds[e.Channel].Item1;
                         string text = "**No, OverBoredGaming is not live!**\n" +
                             "But you can check out the rest of the WYK Team!\n" +
-                            "https://www.twitch.tv/team/wyktv";
+                            "<https://www.twitch.tv/team/wyktv>";
                         await embed.ModifyAsync(x => x.Content = text);
+                        await Task.Delay(250);
                         await embed.ModifyAsync(x => x.Embed = null);
                     }
                     if (Version.Build == BuildType.WYK.Value)
@@ -236,11 +247,16 @@ namespace BluBotCore.Services
             }
 
             var ee = await API.V5.Streams.GetStreamByUserAsync(e.Channel);
+
             if (_liveEmbeds.ContainsKey(e.Channel))
             {
                 if (_client.ConnectionState == ConnectionState.Connected)
                 {
                     if (Setup.DiscordAnnounceChannel == 0) return;
+                    if (Version.Build == BuildType.OBG.Value)
+                    {
+                        if (_liveEmbeds[e.Channel].Item1.Embeds.Count == 0) return;
+                    }
                     var msg = _liveEmbeds[e.Channel];
                     if (msg.Item2 != ee.Stream.Channel.Status || msg.Item3 != ee.Stream.Channel.Game || msg.Item4 != ee.Stream.Viewers)
                     {
@@ -487,7 +503,7 @@ namespace BluBotCore.Services
                     string here = "";
                     if (Version.Build == BuildType.OBG.Value)
                     {
-                        here += $"Yes, **{channelName} is live!**\n" +
+                        here += $"**Yes, {channelName} is live!**\n" +
                             $"Twitch(*{twitchURL}*)";
                     }
                     else
