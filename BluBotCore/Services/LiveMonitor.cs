@@ -311,6 +311,17 @@ namespace BluBotCore.Services
                         await Task.Delay(1000);
                         await SetupEmbedMessageAsync(eb, null, xx.Stream);
                     }
+
+                    if (Version.Build == BuildType.OBG.Value && livestreamers.Streams.Length == 0)
+                    {
+                        var id = (await API.Helix.Users.GetUsersAsync(logins: new List<string> { "overboredgaming" })).Users[0].Id;
+                        string text = "**No, OverBoredGaming is not live!**\n" +
+                            "But you can check out the rest of the WYK Team!\n" +
+                            "<https://www.twitch.tv/team/wyktv>";
+                        RestUserMessage msg = await chan.SendMessageAsync(text);
+                        _liveEmbeds.TryAdd(id, new Tuple<RestUserMessage, string, string, int>(msg, "", "", 0));
+                        await Task.CompletedTask;
+                    }
                 }
 
             }
