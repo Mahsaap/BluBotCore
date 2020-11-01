@@ -31,7 +31,7 @@ namespace BluBotCore.Services
             _client = new DiscordSocketClient(new DiscordSocketConfig
             {
                 WebSocketProvider = WS4NetProvider.Instance,
-                LogLevel = LogSeverity.Info,
+                LogLevel = LogSeverity.Debug,
                 MessageCacheSize = 100,
                 AlwaysDownloadUsers = true,
                 ExclusiveBulkDelete = true

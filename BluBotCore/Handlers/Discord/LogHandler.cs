@@ -20,7 +20,7 @@ namespace BluBotCore.Handlers.Discord
             _client.Log += Log;
             _commands.Log += Log;
         }
-        private async Task Log(LogMessage msg)
+        private Task Log(LogMessage msg)
         {
             switch (msg.Severity)
             {
@@ -48,13 +48,18 @@ namespace BluBotCore.Handlers.Discord
             {
                 string msge = msg.ToString();
                 if (msg.Message != null && msg.Exception != null && msg.Exception.InnerException != null) {
-                    var mahsaap = _client.GetUser(88798728948809728) as IUser;
-                    await mahsaap.SendMessageAsync(msge);
+                    Task.Run(() => DmAsync(msge));
                 }
             }
             Console.WriteLine(msg.ToString());
             Console.ResetColor();
-            //return Task.CompletedTask;
+            return Task.CompletedTask;
+        }
+
+        private async Task DmAsync(string msge)
+        {
+            var mahsaap = _client.GetUser(88798728948809728) as IUser;
+            await mahsaap.SendMessageAsync(msge);
         }
     }
 }

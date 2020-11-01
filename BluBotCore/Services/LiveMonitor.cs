@@ -16,13 +16,13 @@ using TwitchLib.Api.V5.Models.Teams;
 using TwitchLib.Api.Services;
 using TwitchLib.Api.Services.Events.LiveStreamMonitor;
 using BluBotCore.Global;
+using Microsoft.Extensions.Logging;
 
 namespace BluBotCore.Services
 {
     public class LiveMonitor
     {
         #region Private Variables
-
             /// <summary> Discord Client instance </summary>
             private readonly DiscordSocketClient _client;
 
@@ -30,15 +30,15 @@ namespace BluBotCore.Services
             private static DateTime _botOnlineTime;
 
             static DateTime LastTeamCheck;
-            /// <summary> Dictionary of all the live discord messages. Concurrent since this can be added/removed from at anytime. </summary>
-            public static ConcurrentDictionary<string, Tuple<RestUserMessage,string,string,int>> _liveEmbeds = new ConcurrentDictionary<string, Tuple<RestUserMessage,string,string,int>>();
-
         #endregion
+
+        /// <summary> Dictionary of all the live discord messages. Concurrent since this can be added/removed from at anytime. </summary>
+        public static ConcurrentDictionary<string, Tuple<RestUserMessage, string, string, int>> _liveEmbeds = new ConcurrentDictionary<string, Tuple<RestUserMessage, string, string, int>>();
 
         #region Properties
 
-            /// <summary> Live Monitor Instance. </summary>
-            public LiveStreamMonitorService Monitor { get; private set; }
+        /// <summary> Live Monitor Instance. </summary>
+        public LiveStreamMonitorService Monitor { get; private set; }
 
             /// <summary> Twitch API Instance. </summary>
             public TwitchAPI API { get; private set; }
@@ -153,6 +153,7 @@ namespace BluBotCore.Services
                         _ = _liveEmbeds.TryRemove(e.Channel, out _);
                     }
                 }
+
                 if (!_liveEmbeds.ContainsKey(ee.Stream.Channel.Id) && _client.ConnectionState == ConnectionState.Connected)
                 {
                     string url = @"https://www.twitch.tv/" + ee.Stream.Channel.Name;
@@ -211,12 +212,12 @@ namespace BluBotCore.Services
         {
             if (Version.Build == BuildType.WYK.Value)
             {
-                if (DateTime.Now > LastTeamCheck.AddDays(1))
+                if (LastTeamCheck.AddDays(1) <= DateTime.Now)
                 {
                     try
                     {
                         var teamTemp = await API.V5.Teams.GetTeamAsync("wyktv");
-                        // Check Team Count
+                        //Check Team Count
                         if (teamTemp.Users.Length != MonitoredChannels.Count)
                         {
                             await UpdateMonitorAsync();
@@ -224,7 +225,7 @@ namespace BluBotCore.Services
                         }
                         else
                         {
-                            // Check Name Change
+                            //Check Name Change
                             int count = 0;
                             var result = MonitoredChannels.Where(p => teamTemp.Users.All(p2 => p2.Id != p.Value));
                             foreach (var r in result)
@@ -403,6 +404,13 @@ namespace BluBotCore.Services
                     {
                         MonitoredChannels.Add(user.DisplayName, user.Id);
                     }
+
+                    ////test
+                    //var chan = await API.Helix.Users.GetUsersAsync(logins: new List<string> { "trueracing","chezmosis", "smoothsplayground" });
+                    //foreach (var chann in chan.Users)
+                    //{
+                    //    MonitoredChannels.Add(chann.DisplayName, chann.Id);
+                    //}
                 }
                 else if (Version.Build == BuildType.OBG.Value)
                 {
