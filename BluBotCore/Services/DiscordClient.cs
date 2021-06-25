@@ -40,48 +40,7 @@ namespace BluBotCore.Services
 
             await _client.LoginAsync(TokenType.Bot, AES.Decrypt(Cred.DiscordTok));
             await _client.StartAsync();
-
             await Task.Delay(-1);
-        }
-
-        private static void CheckSetupFile()
-        {
-            string filename = "setup.txt";
-            if (!File.Exists(filename))
-            {
-                using (StreamWriter file = new(filename, true, Encoding.UTF8))
-                {
-                    file.WriteLine(Setup.DiscordAnnounceChannel);
-                    file.WriteLine(Setup.DiscordStaffRole);
-                    file.WriteLine(Setup.DiscordWYKTVRole);
-                    file.WriteLine(Setup.DiscordLogChannel);
-                    file.Flush();
-                    file.Close();
-                }
-                Console.WriteLine($"{Globals.CurrentTime} Setup       File {filename} created!");
-            }
-            List<string> tmpList = new();
-            string data;
-            using (StreamReader file = new(filename))
-            {
-                while ((data = file.ReadLine()) != null)
-                    tmpList.Add(data);
-                file.Close();
-            }
-            Setup.DiscordAnnounceChannel = Convert.ToUInt64(tmpList[0]);
-            Setup.DiscordStaffRole = Convert.ToUInt64(tmpList[1]);
-            Setup.DiscordWYKTVRole = Convert.ToUInt64(tmpList[2]);
-            //Seamless change over with additional channel entry - Can be removed after used once.
-            if (tmpList.Count == 3)
-            {
-                tmpList.Add("0");
-                using StreamWriter file = new(filename, true, Encoding.UTF8);
-                file.WriteLine("0");
-                file.Flush();
-                file.Close();
-            }
-            Setup.DiscordLogChannel = Convert.ToUInt64(tmpList[3]);
-            Console.WriteLine($"{Globals.CurrentTime} Setup       File {filename} loaded!");
         }
 
         private static bool CheckInitFile()
@@ -140,6 +99,37 @@ namespace BluBotCore.Services
             }
         }
 
+        private static void CheckSetupFile()
+        {
+            string filename = "setup.txt";
+            if (!File.Exists(filename))
+            {
+                using (StreamWriter file = new(filename, true, Encoding.UTF8))
+                {
+                    file.WriteLine(Setup.DiscordAnnounceChannel);
+                    file.WriteLine(Setup.DiscordStaffRole);
+                    file.WriteLine(Setup.DiscordWYKTVRole);
+                    file.WriteLine(Setup.DiscordLogChannel);
+                    file.Flush();
+                    file.Close();
+                }
+                Console.WriteLine($"{Globals.CurrentTime} Setup       File {filename} created!");
+            }
+            List<string> tmpList = new();
+            string data;
+            using (StreamReader file = new(filename))
+            {
+                while ((data = file.ReadLine()) != null)
+                    tmpList.Add(data);
+                file.Close();
+            }
+            Setup.DiscordAnnounceChannel = Convert.ToUInt64(tmpList[0]);
+            Setup.DiscordStaffRole = Convert.ToUInt64(tmpList[1]);
+            Setup.DiscordWYKTVRole = Convert.ToUInt64(tmpList[2]);
+            Setup.DiscordLogChannel = Convert.ToUInt64(tmpList[3]);
+            Console.WriteLine($"{Globals.CurrentTime} Setup       File {filename} loaded!");
+        }
+
         private IServiceProvider ConfigServices()
         {
             return new ServiceCollection()
@@ -148,7 +138,7 @@ namespace BluBotCore.Services
             {
                 ThrowOnError = true,
                 CaseSensitiveCommands = false,
-                //DefaultRunMode = RunMode.Async
+                DefaultRunMode = RunMode.Async
             }))
             .AddSingleton<CommandHandler>()
             .AddSingleton<LogHandler>()
