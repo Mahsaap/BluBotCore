@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using BluBotCore;
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using System;
@@ -19,7 +20,7 @@ namespace BluBotCore.Handlers.Discord
             _client.Log += Log;
             _commands.Log += Log;
         }
-        private Task Log(LogMessage msg)
+        private async Task Log(LogMessage msg)
         {
             switch (msg.Severity)
             {
@@ -47,18 +48,12 @@ namespace BluBotCore.Handlers.Discord
             {
                 string msge = msg.ToString();
                 if (msg.Message != null && msg.Exception != null && msg.Exception.InnerException != null) {
-                    Task.Run(() => DmAsync(msge));
+                    var mahsaap = _client.GetUser(DiscordIDs.Mahsaap) as IUser;
+                    await mahsaap.SendMessageAsync(msge);
                 }
             }
             Console.WriteLine(msg.ToString());
             Console.ResetColor();
-            return Task.CompletedTask;
-        }
-
-        private async Task DmAsync(string msge)
-        {
-            var mahsaap = _client.GetUser(88798728948809728) as IUser;
-            await mahsaap.SendMessageAsync(msge);
         }
     }
 }
