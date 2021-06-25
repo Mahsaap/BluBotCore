@@ -10,11 +10,9 @@ namespace BluBotCore.Preconditions
 {
     class RequireRoleOrID : PreconditionAttribute
     {
-        /// <summary>Required mod roles for admin commands</summary>
-        private readonly static List<ulong> _requiredRoleId = new List<ulong>(
+        private readonly static List<ulong> _requiredRoleId = new(
             new ulong[] { Setup.DiscordStaffRole , Setup.DiscordWYKTVRole });
-        /// <summary>Required user w/o role for admin commands</summary>
-        private readonly static List<ulong> _requiredUserID = new List<ulong>(
+        private readonly static List<ulong> _requiredUserID = new(
             new ulong[] { DiscordIDs.Mahsaap, DiscordIDs.Space });
 
         public RequireRoleOrID()
@@ -22,11 +20,6 @@ namespace BluBotCore.Preconditions
             //################### Not Required - Test before removing. ######################
         }
 
-        /// <summary>Returns a PreconditionResult after evaluating the context with the requirements.</summary>
-        /// <param name="context">Command context of the current message.</param>
-        /// <param name="command">Command object</param>
-        /// <param name="services">Injection service object</parem>
-        /// <returns>PreconditionResult</returns>
         public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
         {
             if (_requiredUserID.Contains(context.User.Id))

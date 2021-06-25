@@ -29,10 +29,10 @@ namespace BluBotCore.Handlers.Discord
 
         private async Task HandleCommandAsync(SocketMessage messageParam)
         {
-            if (!(messageParam is SocketUserMessage message)) return;
+            if (messageParam is not SocketUserMessage message) return;
             int argPos = 0;
             if (!(message.HasCharPrefix('!', ref argPos) || message.HasMentionPrefix(_client.CurrentUser, ref argPos))) return;
-            SocketCommandContext context = new SocketCommandContext(_client, message);
+            SocketCommandContext context = new(_client, message);
             IResult result = await _commands.ExecuteAsync(context, argPos, _service);
             if (!result.IsSuccess)
             {

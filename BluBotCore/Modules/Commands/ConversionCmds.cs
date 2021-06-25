@@ -1,5 +1,4 @@
-﻿using Discord.Addons.Interactive;
-using Discord.Commands;
+﻿using Discord.Commands;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,7 +7,7 @@ using System.Threading.Tasks;
 namespace BluBotCore.Modules.Commands
 {
     [Name("Conversion")]
-    public class ConversionCmds : InteractiveBase<SocketCommandContext>
+    public class ConversionCmds : ModuleBase<SocketCommandContext>
     {
         [Command("text")]
         [Alias("ascii,txt")]
@@ -26,7 +25,7 @@ namespace BluBotCore.Modules.Commands
             var list = new List<Byte>();
             for (int i = 0; i < binary.Length; i += 8)
             {
-                String t = binary.Substring(i, 8);
+                string t = binary.Substring(i, 8);
                 list.Add(Convert.ToByte(t, 2));
             }
             string text = Encoding.ASCII.GetString(list.ToArray());

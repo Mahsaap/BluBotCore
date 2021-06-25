@@ -1,10 +1,6 @@
 ﻿using BluBotCore.Global;
 using Discord;
 using Discord.WebSocket;
-using System;
-using System.Collections.Concurrent;
-using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BluBotCore.Handlers.Discord
@@ -22,7 +18,6 @@ namespace BluBotCore.Handlers.Discord
 
         private async Task Client_Ready()
         {
-            LoadCustomCmdFile();
             await _client.SetStatusAsync(UserStatus.Online);
             if (Version.Build == BuildType.WYK.Value)
             {
@@ -31,37 +26,6 @@ namespace BluBotCore.Handlers.Discord
             else if (Version.Build == BuildType.OBG.Value)
             {
                 await _client.SetGameAsync("is OBG Live?");
-            }
-        }
-
-        private void LoadCustomCmdFile()
-        {
-            string filename = "customcmds.txt";
-            if (File.Exists(filename))
-            {
-                ConcurrentDictionary<string, string> tmpList = new ConcurrentDictionary<string, string>();
-                string dataNew;
-                using (StreamReader file = new StreamReader(filename))
-                {
-                    while ((dataNew = file.ReadLine()) != null)
-                    {
-                        var split = dataNew.Split('~');
-                        if (split.Length <= 1) return;
-                        tmpList.TryAdd(split[0], split[1]);
-                    }
-                    file.Close();
-                }
-                CustomCommandsHandler.customCommands = tmpList;
-                Console.WriteLine($"{Globals.CurrentTime} Setup       File {filename} loaded!");
-            }
-            else
-            {
-                using (StreamWriter file = new StreamWriter(filename, true, Encoding.UTF8))
-                {
-                    file.Flush();
-                    file.Close();
-                }
-                Console.WriteLine($"{Globals.CurrentTime} Setup       File {filename} has been created!");
             }
         }
     }

@@ -1,4 +1,5 @@
 ﻿using BluBotCore.Other;
+using Discord;
 using Discord.WebSocket;
 using System;
 using System.Threading.Tasks;
@@ -17,104 +18,53 @@ namespace BluBotCore.Handlers.Discord
             _client.UserLeft += Client_UserLeft;
             _client.UserBanned += Client_UserBanned;
             _client.UserUnbanned += Client_UserUnbanned;
-            //_client.UserVoiceStateUpdated += _client_UserVoiceStateUpdated;
         }
 
-        //private async Task Client_UserVoiceStateUpdated(SocketUser user, SocketVoiceState voiceBefore, SocketVoiceState voiceAfter)
-        //{
-        //    if (Setup.DiscordLogChannel == 0) return;
-        //    //Joined Voice Channel
-        //    if (voiceBefore.VoiceChannel == null && voiceAfter.VoiceChannel != null)
-        //    {
-        //        var time = DateTime.Now.ToString("HH:MM:ss");
-        //        var logChan = _client.GetChannel(Setup.DiscordLogChannel) as SocketTextChannel;
+        private static string CreateMessage(string username, string discriminator, string id, string type)
+        {
+            return $"{Globals.CurrentTime} [SERVER] {username}#{discriminator} has been {type}. " +
+                $"\n({id})";
+        }
 
-        //        string message = $"{time} [VOICE] {user.Username}#{user.Discriminator} has CONNECTED to " +
-        //            $"{voiceAfter.VoiceChannel.Name}. " +
-        //            $"\n({user.Id})";
+        private static void ConsoleWrite(string message)
+        {
+            Console.WriteLine($"{Globals.CurrentTime} Discord     {message}");
+        }
 
-        //        await logChan.SendMessageAsync($"```{message}```");
-        //        Console.WriteLine($"{time} Discord     {message}");
-        //    }
-
-        //    //Changed Voice Channel
-        //    else if (voiceBefore.VoiceChannel != null && voiceAfter.VoiceChannel != null && (voiceBefore.VoiceChannel.Id != voiceAfter.VoiceChannel.Id))
-        //    {
-        //        var time = DateTime.Now.ToString("HH:MM:ss");
-        //        var logChan = _client.GetChannel(Setup.DiscordLogChannel) as SocketTextChannel;
-
-        //        string message = $"{time} [VOICE] {user.Username}#{user.Discriminator} has CHANGED from " +
-        //            $"{voiceBefore.VoiceChannel.Name} to {voiceAfter.VoiceChannel.Name}. " +
-        //            $"\n({user.Id})";
-
-        //        await logChan.SendMessageAsync($"```{message}```");
-        //        Console.WriteLine($"{time} Discord     {message}");
-        //    }
-
-        //    //Left Voice Channel
-        //    else if (voiceBefore.VoiceChannel != null && voiceAfter.VoiceChannel == null)
-        //    {
-        //        var time = DateTime.Now.ToString("HH:MM:ss");
-        //        var logChan = _client.GetChannel(Setup.DiscordLogChannel) as SocketTextChannel;
-
-        //        string message = $"{time} [VOICE] {user.Username}#{user.Discriminator} has DISCONNECTED. " +
-        //            $"\n({user.Id})";
-
-        //        await logChan.SendMessageAsync($"```{message}```");
-        //        Console.WriteLine($"{time} Discord     {message}");
-        //    }
-        //}
+        private async Task SendDiscordAsync(string message)
+        {
+            if (_client.ConnectionState == ConnectionState.Connected) return;
+            if (Setup.DiscordLogChannel == 0) return;
+            var logChan = _client.GetChannel(Setup.DiscordLogChannel) as SocketTextChannel;
+            await logChan.SendMessageAsync($"```{message}```");
+        }
 
         private async Task Client_UserUnbanned(SocketUser user, SocketGuild guild)
         {
-            if (Setup.DiscordLogChannel == 0) return;
-
-            var logChan = _client.GetChannel(Setup.DiscordLogChannel) as SocketTextChannel;
-
-            string message = $"{Globals.CurrentTime} [SERVER] {user.Username}#{user.Discriminator} has been UNBANNED. " +
-                $"\n({user.Id})";
-
-            await logChan.SendMessageAsync($"```{message}```");
-            Console.WriteLine($"{Globals.CurrentTime} Discord     {message}");
+            string message = CreateMessage(user.Username, user.Discriminator, user.Id.ToString(), "UNBANNED");
+            ConsoleWrite(message);
+            await SendDiscordAsync(message);
         }
 
         private async Task Client_UserBanned(SocketUser user, SocketGuild guild)
         {
-            if (Setup.DiscordLogChannel == 0) return;
-
-            var logChan = _client.GetChannel(Setup.DiscordLogChannel) as SocketTextChannel;
-
-            string message = $"{Globals.CurrentTime} [SERVER] {user.Username}#{user.Discriminator} has been BANNED. " +
-                $"\n({user.Id})";
-
-            await logChan.SendMessageAsync($"```{message}```");
-            Console.WriteLine($"{Globals.CurrentTime} Discord     {message}");
+            string message = CreateMessage(user.Username, user.Discriminator, user.Id.ToString(), "BANNED");
+            ConsoleWrite(message);
+            await SendDiscordAsync(message);
         }
 
         private async Task Client_UserLeft(SocketGuildUser guildUser)
         {
-            if (Setup.DiscordLogChannel == 0) return;
-
-            var logChan = _client.GetChannel(Setup.DiscordLogChannel) as SocketTextChannel;
-
-            string message = $"{Globals.CurrentTime} [SERVER] {guildUser.Username}#{guildUser.Discriminator} has LEFT or KICKED. " +
-                $"\n({guildUser.Id})";
-
-            await logChan.SendMessageAsync($"```{message}```");
-            Console.WriteLine($"{Globals.CurrentTime} Discord     {message}");
+            string message = CreateMessage(guildUser.Username, guildUser.Discriminator, guildUser.Id.ToString(), "LEFT OR KICKED");
+            ConsoleWrite(message);
+            await SendDiscordAsync(message);
         }
 
         private async Task Client_UserJoined(SocketGuildUser guildUser)
         {
-            if (Setup.DiscordLogChannel == 0) return;
-
-            var logChan = _client.GetChannel(Setup.DiscordLogChannel) as SocketTextChannel;
-
-            string message = $"{Globals.CurrentTime} [SERVER] {guildUser.Username}#{guildUser.Discriminator} has JOINED. " +
-                $"\n({guildUser.Id})";
-
-            await logChan.SendMessageAsync($"```{message}```");
-            Console.WriteLine($"{Globals.CurrentTime} Discord     {message}");
+            string message = CreateMessage(guildUser.Username, guildUser.Discriminator, guildUser.Id.ToString(), "JOINED");
+            ConsoleWrite(message);
+            await SendDiscordAsync(message);
         }
     }
 }

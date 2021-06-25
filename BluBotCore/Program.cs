@@ -7,7 +7,7 @@ namespace BluBotCore
     {
         public static async Task Main()
         {
-            DiscordClient _discord = new DiscordClient();
+            DiscordClient _discord = new();
             await _discord.MainAsync();
         }
     }

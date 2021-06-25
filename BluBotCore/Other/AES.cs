@@ -23,7 +23,7 @@ namespace BluBotCore.Other
         static string EncryptStringToBase64String(string plainText, byte[] Key)
         {
             if (Key == null || Key.Length <= 0)
-                throw new ArgumentNullException("Key");
+                throw new ArgumentNullException(nameof(Key));
             byte[] returnValue;
             using (Aes aes = Aes.Create())
             {
@@ -34,9 +34,9 @@ namespace BluBotCore.Other
                 if (string.IsNullOrEmpty(plainText))
                     return Convert.ToBase64String(iv);
                 ICryptoTransform encryptor = aes.CreateEncryptor(Key, iv);
-                using MemoryStream msEncrypt = new MemoryStream();
-                using CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write);
-                using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
+                using MemoryStream msEncrypt = new();
+                using CryptoStream csEncrypt = new(msEncrypt, encryptor, CryptoStreamMode.Write);
+                using (StreamWriter swEncrypt = new(csEncrypt))
                 {
                     swEncrypt.Write(plainText);
                 }
@@ -53,7 +53,7 @@ namespace BluBotCore.Other
             if (string.IsNullOrEmpty(cipherText))
                 return string.Empty;
             if (Key == null || Key.Length <= 0)
-                throw new ArgumentNullException("Key");
+                throw new ArgumentNullException(nameof(Key));
             string plaintext = null;
             byte[] allBytes = Convert.FromBase64String(cipherText);
             using (Aes aes = Aes.Create())
@@ -67,9 +67,9 @@ namespace BluBotCore.Other
                 byte[] cipherBytes = new byte[allBytes.Length - iv.Length];
                 Array.Copy(allBytes, iv.Length, cipherBytes, 0, cipherBytes.Length);
                 ICryptoTransform decryptor = aes.CreateDecryptor(Key, iv);
-                using MemoryStream msDecrypt = new MemoryStream(cipherBytes);
-                using CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read);
-                using StreamReader srDecrypt = new StreamReader(csDecrypt);
+                using MemoryStream msDecrypt = new(cipherBytes);
+                using CryptoStream csDecrypt = new(msDecrypt, decryptor, CryptoStreamMode.Read);
+                using StreamReader srDecrypt = new(csDecrypt);
                 plaintext = srDecrypt.ReadToEnd();
             }
             return plaintext;

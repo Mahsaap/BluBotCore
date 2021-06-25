@@ -1,9 +1,6 @@
 ﻿using BluBotCore.Preconditions;
 using BluBotCore.Services;
 using Discord.Commands;
-using Discord.WebSocket;
-using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace BluBotCore.Modules.Commands
@@ -40,7 +37,7 @@ namespace BluBotCore.Modules.Commands
         {
             var msg = await ReplyAsync("Updating...");
             bool complete = await _monitor.UpdateMonitorAsync(channel);
-            
+
             if (complete && msg != null && channel == null)
             {
                 await msg.ModifyAsync(x => x.Content = "Updated all channel posts.");
