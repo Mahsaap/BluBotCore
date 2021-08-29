@@ -8,10 +8,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using TwitchLib;
 using TwitchLib.Api;
 using TwitchLib.Api.Core.Exceptions;
-using TwitchLib.Api.V5.Models.Channels;
-using TwitchLib.Api.V5.Models.Teams;
+using TwitchLib.Api.Helix;
+using TwitchLib.Api.Helix.Models;
 using TwitchLib.Api.Services;
 using TwitchLib.Api.Services.Events.LiveStreamMonitor;
 using BluBotCore.Global;
@@ -24,9 +25,9 @@ namespace BluBotCore.Services
         private readonly DiscordSocketClient _client;
         private static DateTime _botOnlineTime;
         static DateTime LastTeamCheck;
+        private static string teamBanner;
         private static readonly ConcurrentDictionary<string, Tuple<RestUserMessage, string, string, int>> concurrentDictionary = new();
-
-        public static ConcurrentDictionary<string, Tuple<RestUserMessage, string, string, int>> _liveEmbeds = concurrentDictionary;
+        private static ConcurrentDictionary<string, Tuple<RestUserMessage, string, string, int>> _liveEmbeds = concurrentDictionary;
         public LiveStreamMonitorService Monitor { get; private set; }
         public TwitchAPI API { get; private set; }
         public static Dictionary<String, String> MonitoredChannels { get; } = new Dictionary<string, string>();
@@ -110,8 +111,7 @@ namespace BluBotCore.Services
         {
             try
             {
-                var ee = await API.V5.Streams.GetStreamByUserAsync(e.Channel);
-
+                var s = (await API.Helix.Streams.GetStreamsAsync(userIds: new List<string>{ e.Channel })).Streams[0];
                 if (Version.Build == BuildType.OBG.Value)
                 {
                     if (_liveEmbeds.ContainsKey(e.Channel) && _client.ConnectionState == ConnectionState.Connected)
@@ -122,16 +122,18 @@ namespace BluBotCore.Services
                     }
                 }
 
-                if (!_liveEmbeds.ContainsKey(ee.Stream.Channel.Id) && _client.ConnectionState == ConnectionState.Connected)
+                if (!_liveEmbeds.ContainsKey(s.UserId) && _client.ConnectionState == ConnectionState.Connected)
                 {
-                    string url = @"https://www.twitch.tv/" + ee.Stream.Channel.Name;
-                    EmbedBuilder eb = SetupLiveEmbed($":link: {ee.Stream.Channel.DisplayName}", ee.Stream.Channel.Status, ee.Stream.Channel.Game,
-                        ee.Stream.Preview.Medium + Guid.NewGuid(), ee.Stream.Channel.Logo, url, ee.Stream.Viewers);
+                    string thumburl = Globals.EditPreviewURL(s.ThumbnailUrl);
+                    var user = (await API.Helix.Users.GetUsersAsync(ids: new List<string> { $"{s.UserId}" })).Users[0];
+                    string url = @"https://www.twitch.tv/" + s.UserName;
+                    EmbedBuilder eb = SetupLiveEmbed($":link: {s.UserName}", s.Title, s.GameName,
+                        thumburl + Guid.NewGuid(), user.ProfileImageUrl, url);
 
-                    Console.WriteLine($"{Globals.CurrentTime} Monitor     {ee.Stream.Channel.DisplayName} is live playing {ee.Stream.Game}");
+                    Console.WriteLine($"{Globals.CurrentTime} Monitor     {s.UserName} is live playing {s.GameName}");
 
                     await Task.Delay(1000);
-                    await SetupEmbedMessageAsync(eb, ee, null);
+                    await SetupEmbedMessageAsync(eb, s);
                 }
             }
             catch (Exception ex)
@@ -144,8 +146,8 @@ namespace BluBotCore.Services
         {
             try
             {
-                var ee = await API.V5.Channels.GetChannelByIDAsync(e.Channel);
-                Console.WriteLine($"{Globals.CurrentTime} Monitor     {ee.DisplayName} is offline");
+                var s = (await API.Helix.Users.GetUsersAsync(ids: new List<string> { e.Channel })).Users[0];
+                Console.WriteLine($"{Globals.CurrentTime} Monitor     {s.DisplayName} is offline");
 
                 if (_liveEmbeds.ContainsKey(e.Channel) && _client.ConnectionState == ConnectionState.Connected)
                 {
@@ -182,7 +184,7 @@ namespace BluBotCore.Services
                 {
                     try
                     {
-                        var teamTemp = await API.V5.Teams.GetTeamAsync("wyktv");
+                        var teamTemp = (await API.Helix.Teams.GetTeamsAsync(teamName: "wyktv")).Teams[0];
                         //Check Team Count
                         if (teamTemp.Users.Length != MonitoredChannels.Count)
                         {
@@ -193,7 +195,7 @@ namespace BluBotCore.Services
                         {
                             //Check Name Change
                             int count = 0;
-                            var result = MonitoredChannels.Where(p => teamTemp.Users.All(p2 => p2.Id != p.Value));
+                            var result = MonitoredChannels.Where(p => teamTemp.Users.All(p2 => p2.UserId != p.Value));
                             foreach (var r in result)
                             {
                                 count++;
@@ -213,7 +215,7 @@ namespace BluBotCore.Services
                 }
             }
 
-            var ee = await API.V5.Streams.GetStreamByUserAsync(e.Channel);
+            var s = (await API.Helix.Streams.GetStreamsAsync(userIds: new List<string> { e.Channel })).Streams[0];
 
             if (_liveEmbeds.ContainsKey(e.Channel))
             {
@@ -225,14 +227,16 @@ namespace BluBotCore.Services
                         if (_liveEmbeds[e.Channel].Item1.Embeds.Count == 0) return;
                     }
                     var msg = _liveEmbeds[e.Channel];
-                    if (msg.Item2 != ee.Stream.Channel.Status || msg.Item3 != ee.Stream.Channel.Game || msg.Item4 != ee.Stream.Viewers)
+                    if (msg.Item2 != s.Title || msg.Item3 != s.GameName)
                     {
-                        EmbedBuilder eb = SetupLiveEmbed($":link: {ee.Stream.Channel.DisplayName}", $"{ee.Stream.Channel.Status}", $"{ee.Stream.Channel.Game}",
-                            ee.Stream.Preview.Medium + Guid.NewGuid().ToString(), ee.Stream.Channel.Logo, @"https://www.twitch.tv/" + ee.Stream.Channel.Name, ee.Stream.Viewers);
+                        string thumburl = Globals.EditPreviewURL(s.ThumbnailUrl);
+                        var user = (await API.Helix.Users.GetUsersAsync(ids: new List<string> { $"{s.UserId}" })).Users[0];
+                        EmbedBuilder eb = SetupLiveEmbed($":link: {s.UserName}", $"{s.Title}", $"{s.GameName}",
+                            thumburl + Guid.NewGuid(), user.ProfileImageUrl, @"https://www.twitch.tv/" + s.UserName);
 
                         await UpdateNotificationAsync(eb, _liveEmbeds, e);
 
-                        Console.WriteLine($"{Globals.CurrentTime} Monitor     Stream {ee.Stream.Channel.DisplayName} updated");
+                        Console.WriteLine($"{Globals.CurrentTime} Monitor     Stream {s.UserName} updated");
                         await Task.Delay(500);
                     }
                 }
@@ -247,7 +251,7 @@ namespace BluBotCore.Services
             _liveEmbeds.Clear();
             try
             {
-                var livestreamers = await API.V5.Streams.GetLiveStreamsAsync(Monitor.ChannelsToMonitor);
+                var teamStreams = await API.Helix.Streams.GetStreamsAsync(userIds: Monitor.ChannelsToMonitor);
 
                 if (_client.ConnectionState == ConnectionState.Connected)
                 {
@@ -268,18 +272,27 @@ namespace BluBotCore.Services
                         }
                     }
 
-                    foreach (var x in livestreamers.Streams)
-                    {
-                        var xx = await API.V5.Streams.GetStreamByUserAsync(x.Channel.Id);
-                        EmbedBuilder eb = SetupLiveEmbed($":link: {xx.Stream.Channel.DisplayName}", xx.Stream.Channel.Status, xx.Stream.Channel.Game,
-                        xx.Stream.Preview.Medium + Guid.NewGuid().ToString(), xx.Stream.Channel.Logo, @"https://www.twitch.tv/" + xx.Stream.Channel.Name, xx.Stream.Viewers);
+                    //if (teamBanner != null)
+                    //{
+                    //    await chan.SendMessageAsync(teamBanner);
+                    //}
 
-                        Console.WriteLine($"{Globals.CurrentTime} Monitor     {xx.Stream.Channel.DisplayName} is live playing {xx.Stream.Game}");
-                        await Task.Delay(1000);
-                        await SetupEmbedMessageAsync(eb, null, xx.Stream);
+                    foreach (var s in teamStreams.Streams)
+                    {
+                        if (s.Type == "live")
+                        {
+                            var user = (await API.Helix.Users.GetUsersAsync(ids: new List<string> { s.UserId })).Users[0];
+                            string thumburl = Globals.EditPreviewURL(s.ThumbnailUrl);
+                            EmbedBuilder eb = SetupLiveEmbed($":link: {s.UserName}", s.Title, s.GameName,
+                            thumburl + Guid.NewGuid(), user.ProfileImageUrl, @"https://www.twitch.tv/" + s.UserName);
+
+                            Console.WriteLine($"{Globals.CurrentTime} Monitor     {s.UserName} is live playing {s.GameName}");
+                            await Task.Delay(2000);
+                            await SetupEmbedMessageAsync(eb, s);
+                        }
                     }
 
-                    if (Version.Build == BuildType.OBG.Value && livestreamers.Streams.Length == 0)
+                    if (Version.Build == BuildType.OBG.Value && teamStreams.Streams.Length == 0)
                     {
                         var id = (await API.Helix.Users.GetUsersAsync(logins: new List<string> { "overboredgaming" })).Users[0].Id;
                         string text = "**No, OverBoredGaming is not live!**\n" +
@@ -306,12 +319,12 @@ namespace BluBotCore.Services
         {
             try
             {
-                var ee = await API.V5.Streams.GetStreamByUserAsync(e.Channel);
+                var s = (await API.Helix.Streams.GetStreamsAsync(userIds: new List<string> { e.Channel })).Streams[0];
                 if (lst.ContainsKey(e.Channel))
                 {
                     var msg = lst[e.Channel];
                     await msg.Item1.ModifyAsync(x => x.Embed = eb.Build());
-                    lst[e.Channel] = new Tuple<RestUserMessage, string, string, int>(msg.Item1, ee.Stream.Channel.Status, ee.Stream.Channel.Game, ee.Stream.Viewers);
+                    lst[e.Channel] = new Tuple<RestUserMessage, string, string, int>(msg.Item1, s.Title, s.GameName, s.ViewerCount);
                 }
             }
             catch (Exception ex)
@@ -320,7 +333,7 @@ namespace BluBotCore.Services
             }
         }
 
-        private static EmbedBuilder SetupLiveEmbed(string title, string description, string game, string image, string thumbnail, string url, int vCount)
+        private static EmbedBuilder SetupLiveEmbed(string title, string description, string game, string image, string thumbnail, string url)
         {
             title = Globals.NullEmptyCheck(title);
             description = Globals.NullEmptyCheck(description);
@@ -328,7 +341,7 @@ namespace BluBotCore.Services
 
             EmbedBuilder eb = new()
             {
-                Color = new Discord.Color(51, 102, 153),
+                Color = new Color(51, 102, 153),
                 Title = title,
                 Description = description,
                 Url = url
@@ -337,13 +350,7 @@ namespace BluBotCore.Services
             {
                 x.Name = $"Playing";
                 x.Value = game;
-                x.IsInline = true;
-            });
-            eb.AddField(x =>
-            {
-                x.Name = $"Viewer Count";
-                x.Value = vCount;
-                x.IsInline = true;
+                x.IsInline = false;
             });
             eb.WithImageUrl(image);
             eb.WithThumbnailUrl(thumbnail);
@@ -362,17 +369,17 @@ namespace BluBotCore.Services
                 LastTeamCheck = DateTime.Now;
                 if (Version.Build == BuildType.WYK.Value)
                 {
-                    Team team = await API.V5.Teams.GetTeamAsync("wyktv");
-
-                    foreach (Channel user in team.Users)
+                    var team = (await API.Helix.Teams.GetTeamsAsync(teamName: "wyktv")).Teams[0];
+                    teamBanner = team.Banner;
+                    foreach (var user in team.Users)
                     {
-                        MonitoredChannels.Add(user.DisplayName, user.Id);
+                        MonitoredChannels.Add(user.UserName, user.UserId);
                     }
                 }
                 else if (Version.Build == BuildType.OBG.Value)
                 {
-                    var chan = await API.Helix.Users.GetUsersAsync(logins: new List<string> { "overboredgaming" });
-                    MonitoredChannels.Add(chan.Users[0].DisplayName, chan.Users[0].Id);
+                    var chan = (await API.Helix.Users.GetUsersAsync(logins: new List<string> { "overboredgaming" })).Users[0];
+                    MonitoredChannels.Add(chan.DisplayName, chan.Id);
                 }
                 Monitor.SetChannelsById(MonitoredChannels.Values.ToList());
             }
@@ -395,24 +402,23 @@ namespace BluBotCore.Services
             {
                 try
                 {
-                    var user = await API.V5.Users.GetUserByNameAsync(channel);
-                    string channelID = user.Matches[0].Id;
-
-                    var ee = await API.V5.Streams.GetStreamByUserAsync(channelID);
-                    if (_liveEmbeds.ContainsKey(channelID))
+                    var s = (await API.Helix.Streams.GetStreamsAsync(userLogins: new List<string> { channel })).Streams[0];
+                    if (_liveEmbeds.ContainsKey(channel))
                     {
                         if (_client.ConnectionState == ConnectionState.Connected)
                         {
                             if (Setup.DiscordAnnounceChannel == 0) return false;
-                            var msg = _liveEmbeds[channelID];
+                            var msg = _liveEmbeds[s.UserId];
 
-                            EmbedBuilder eb = SetupLiveEmbed($":link: {ee.Stream.Channel.DisplayName}", ee.Stream.Channel.Status, ee.Stream.Channel.Game,
-                                ee.Stream.Preview.Medium + Guid.NewGuid().ToString(), ee.Stream.Channel.Logo, @"https://www.twitch.tv/" + ee.Stream.Channel.Name, ee.Stream.Viewers);
+                            string thumburl = Globals.EditPreviewURL(s.ThumbnailUrl);
+                            var user = (await API.Helix.Users.GetUsersAsync(ids: new List<string> { $"{s.UserId}" })).Users[0];
+                            EmbedBuilder eb = SetupLiveEmbed($":link: {s.UserName}", s.Title, s.GameName,
+                                thumburl + Guid.NewGuid().ToString(), user.ProfileImageUrl, @"https://www.twitch.tv/" + s.UserName);
 
                             await msg.Item1.ModifyAsync(x => x.Embed = eb.Build());
-                            _liveEmbeds[channelID] = new Tuple<RestUserMessage, string, string,int>(msg.Item1, ee.Stream.Channel.Status, ee.Stream.Channel.Game, ee.Stream.Viewers);
+                            _liveEmbeds[s.UserId] = new Tuple<RestUserMessage, string, string,int>(msg.Item1, s.Title, s.GameName, s.ViewerCount);
 
-                            Console.WriteLine($"{Globals.CurrentTime} Monitor     Stream {ee.Stream.Channel.DisplayName} updated");
+                            Console.WriteLine($"{Globals.CurrentTime} Monitor     Stream {s.UserName} updated");
                             return true;
                         }
                     }
@@ -430,18 +436,16 @@ namespace BluBotCore.Services
         {
             try
             {
-                var user = await API.V5.Users.GetUserByNameAsync(channel);
-                string channelID = user.Matches[0].Id;
-                var ee = await API.V5.Channels.GetChannelByIDAsync(channelID);
-                Console.WriteLine($"{Globals.CurrentTime} Monitor     {ee.DisplayName} was removed manually.");
+                var s = (await API.Helix.Streams.GetStreamsAsync(userLogins: new List<string> { channel })).Streams[0];
+                Console.WriteLine($"{Globals.CurrentTime} Monitor     {s.UserName} was removed manually.");
 
-                if (_liveEmbeds.ContainsKey(channelID))
+                if (_liveEmbeds.ContainsKey(s.UserId))
                 {
                     await Task.Delay(250);
-                    RestUserMessage embed = _liveEmbeds[channelID].Item1;
+                    RestUserMessage embed = _liveEmbeds[s.UserId].Item1;
                     if (_client.ConnectionState == ConnectionState.Connected)
                         await embed.DeleteAsync();
-                    _liveEmbeds.TryRemove(channelID, out Tuple<RestUserMessage, string, string, int> outResult);
+                    _liveEmbeds.TryRemove(s.UserId, out Tuple<RestUserMessage, string, string, int> outResult);
                     Console.WriteLine($"{Globals.CurrentTime} Monitor     TryParse OutResult: {outResult}");
                     return true;
                 }
@@ -454,40 +458,26 @@ namespace BluBotCore.Services
             }
         }
 
-        private async Task SetupEmbedMessageAsync(EmbedBuilder eb, TwitchLib.Api.V5.Models.Streams.StreamByUser e, TwitchLib.Api.V5.Models.Streams.Stream s)
+        private async Task SetupEmbedMessageAsync(EmbedBuilder eb, TwitchLib.Api.Helix.Models.Streams.GetStreams.Stream s)
         {
             try
             {
-                if (s == null && e == null || eb == null) return;
-                TwitchLib.Api.V5.Models.Streams.StreamByUser ee = null;
-                if (e != null)
-                {
-                    ee = await API.V5.Streams.GetStreamByUserAsync(e.Stream.Channel.Id);
-                }
-
-                string twitchURL = ee?.Stream.Channel.Url ?? s?.Channel.Url;
-                string channelID = ee?.Stream.Channel.Id ?? s?.Channel.Id;
-                string channelName = ee?.Stream.Channel.DisplayName ?? s?.Channel.DisplayName;
-                string status = ee?.Stream.Channel.Status ?? s?.Channel.Status;
-                string game = ee?.Stream.Channel.Game ?? s?.Channel.Game;
-                int vCount = ee?.Stream.Viewers ?? s.Viewers;
-
                 if (Setup.DiscordAnnounceChannel == 0) return;
                 if (_client.ConnectionState == ConnectionState.Connected)
                 {
                     string here = "";
                     if (Version.Build == BuildType.OBG.Value)
                     {
-                        here += $"**Yes, {channelName} is live!**\n" +
-                            $"Twitch(*{twitchURL}*)";
+                        here += $"**Yes, {s.UserName} is live!**\n" +
+                            $"Twitch(*https://www.twitch.tv/{s.UserName}*)";
                     }
                     else
                     {
                         if (_botOnlineTime.AddSeconds(30) <= DateTime.Now) here = "@here ";
-                        here += $"\nTwitch (*{twitchURL}*)";
-                        here = here.Insert(0, $"**{channelName} is live!** ");
+                        here += $"\nTwitch (*https://www.twitch.tv/{s.UserName}*)";
+                        here = here.Insert(0, $"**{s.UserName} is live!** ");
                     }
-                    await SendEmbedAsync(Setup.DiscordAnnounceChannel, eb, here, channelID, status, game, vCount);
+                    await SendEmbedAsync(Setup.DiscordAnnounceChannel, eb, here, s.UserId, s.Title, s.GameName, s.ViewerCount);
                 }
             }
             catch (Exception ex)
