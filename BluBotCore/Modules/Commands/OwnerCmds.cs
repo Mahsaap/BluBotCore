@@ -30,7 +30,7 @@ namespace BluBotCore.Modules.Commands
             Setup.DiscordStaffRole = role.Id;
             await ReplyAsync($"Staff/Admin role set as {role.Name} - ({role.Id})");
             string filename = "setup.txt";
-            List<string> tempLst = new List<string>()
+            List<string> tempLst = new()
             {
                 Setup.DiscordAnnounceChannel.ToString(),
                 Setup.DiscordStaffRole.ToString(),

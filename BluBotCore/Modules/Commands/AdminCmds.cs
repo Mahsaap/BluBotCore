@@ -26,7 +26,6 @@ namespace BluBotCore.Modules.Commands
             await ReplyAsync($"V{Version.Major}.{Version.Minor} > {Version.Build}");
         }
 
-        //End application - ConsoleApp
         [Command("shutdown"), Summary("Shuts down the bot.")]
         public async Task ShutdownBotAsync()
         {
@@ -66,45 +65,12 @@ namespace BluBotCore.Modules.Commands
             File.WriteAllLines(filename, tempLst);
         }
 
-        [Command("SetLogChannel")]
-        public async Task LogChannelSet(IGuildChannel chan)
-        {
-            Setup.DiscordLogChannel = chan.Id;
-            await ReplyAsync($"Log Channel set as {chan.Name} - ({chan.Id})");
-            const string filename = "setup.txt";
-            var tempLst = new List<string>()
-            {
-                Setup.DiscordAnnounceChannel.ToString(),
-                Setup.DiscordStaffRole.ToString(),
-                Setup.DiscordWYKTVRole.ToString(),
-                Setup.DiscordLogChannel.ToString()
-            };
-            File.WriteAllLines(filename, tempLst);
-        }
-
-        [Command("DisableLogChannel")]
-        public async Task DisableLogChannel()
-        {
-            Setup.DiscordLogChannel = 0;
-            await ReplyAsync($"Log Channel has been disabled.");
-            const string filename = "setup.txt";
-            var tempLst = new List<string>()
-            {
-                Setup.DiscordAnnounceChannel.ToString(),
-                Setup.DiscordStaffRole.ToString(),
-                Setup.DiscordWYKTVRole.ToString(),
-                Setup.DiscordLogChannel.ToString()
-            };
-            File.WriteAllLines(filename, tempLst);
-        }
-
-        //botinfo
         [Command("botinfo"), Summary("Bot framework info.")]
         public async Task BotInfoAsync()
         {
             RestApplication application = await Context.Client.GetApplicationInfoAsync();
 
-            EmbedBuilder eb = new EmbedBuilder()
+            EmbedBuilder eb = new()
             {
                 Color = new Discord.Color(51, 102, 153),
                 Title = "**__Bot Info__**",
@@ -133,9 +99,7 @@ namespace BluBotCore.Modules.Commands
                 x.Name = "**Libraries**";
                 x.Value = "" +
                 $"Discord.Net ({DiscordConfig.Version})\n" +
-                "TwitchLib.API 3.1.4\n" +
-                "StrawPollNet 1.0.2\n" +
-                "SteamStoreQuery 1.0.4";
+                "TwitchLib.API 3.2.5-Dev";
                 x.IsInline = false;
             });
             eb.AddField(x =>
@@ -152,21 +116,6 @@ namespace BluBotCore.Modules.Commands
                 $"Latency: {Context.Client.Latency}ms\n";
                 x.IsInline = true;
             });
-            string guildsStr = "";
-            foreach (SocketGuild guild in Context.Client.Guilds)
-            {
-                guildsStr += $"**{guild.Name}** ({guild.Id})\n" +
-                    $"- Members ({guild.MemberCount})\n" +
-                    $"- Channels ({guild.Channels.Count})>(V{guild.VoiceChannels.Count})(T{guild.TextChannels.Count})\n" +
-                    $"- Roles = {guild.Roles.Count}\n" +
-                    $"- Owner = {guild.Owner}({guild.OwnerId})\n";
-            }
-            eb.AddField(x =>
-            {
-                x.Name = "**Guilds**";
-                x.Value = $"{guildsStr}";
-                x.IsInline = false;
-            });
             eb.WithFooter(x =>
             {
                 x.Text = $"Uptime: {GetUptime()}";
@@ -175,7 +124,6 @@ namespace BluBotCore.Modules.Commands
             await ReplyAsync("", embed: eb.Build());
         }
 
-        //Purge messages
         [RequireBotPermission(GuildPermission.ManageMessages)]
         [Command("purge"), Summary("Purge messages.")]
         public async Task PurgeMsgAsync(int num)
@@ -204,7 +152,6 @@ namespace BluBotCore.Modules.Commands
             await Context.Client.SetGameAsync(entry);
         }
 
-        //set bot nick
         [RequireBotPermission(GuildPermission.ChangeNickname)]
         [Command("botnick")]
         [Summary("Change bot nickname.")]
@@ -216,25 +163,22 @@ namespace BluBotCore.Modules.Commands
             await ReplyAsync($"Changed my nickname to `{name}`");
         }
 
-        //Set a users nickname
         [RequireBotPermission(GuildPermission.ChangeNickname)]
         [Command("setusernick")]
         [Summary("Change a users nickname.")]
         public async Task UserNickAsync(IUser user, [Remainder]string name)
         {
-            //IGuild guild = Context.Guild;
             IGuildUser usr = user as IGuildUser;
             await usr.ModifyAsync(x => x.Nickname = name);
             await ReplyAsync($"Changed {usr.Username}'s nickname to {name}");
         }
 
-        //User Roles
         [Command("UserRoles"), Summary("Specified user's current roles.")]
         public async Task UserRolesAsync(IGuildUser user)
         {
             var roles = user.Guild.Roles;
             string title = $"{user.Username}'s Role List in {Context.Guild.Name}";
-            StringBuilder strB = new StringBuilder();
+            StringBuilder strB = new();
             strB.AppendLine(title);
             int total = 0;
             foreach (IRole r in roles)
@@ -249,19 +193,17 @@ namespace BluBotCore.Modules.Commands
             await ReplyAsync(strB.ToString());
         }
 
-        //Uptime
         [Command("uptime"), Summary("Bot uptime.")]
         public async Task UptimeAsync()
         {
             await ReplyAsync($"Active for {GetUptime()}.");
         }
 
-        //List Roles/Users per guild
         [Command("listroles"), Summary("Roles or users with specified role")]
         public async Task ListRoleAsync([Remainder]IRole irole = null)
         {
             SocketGuild guild = Context.Guild;
-            StringBuilder strB = new StringBuilder();
+            StringBuilder strB = new();
 
             //no role specified - list all roles in the guild
             if (irole == null)
@@ -282,7 +224,7 @@ namespace BluBotCore.Modules.Commands
 
                 for (int i = 0; i < listGuildRoles.Count; i++)
                 {
-                    strB.AppendLine($"{listGuildRoles[i].Remove(1).ToUpper() + listGuildRoles[i].Substring(1)}");
+                    strB.AppendLine($"{listGuildRoles[i].Remove(1).ToUpper() + listGuildRoles[i][1..]}");
                 }
 
                 strB.Insert(title.Length, $" ({listGuildRoles.Count} Total)" + Environment.NewLine);
@@ -315,7 +257,6 @@ namespace BluBotCore.Modules.Commands
             }
         }
 
-        //Multi link
         [Command("multi"), Summary("Urls for multi streams.")]
         public async Task MultiCastAsync([Remainder]string casters = null)
         {
@@ -326,21 +267,18 @@ namespace BluBotCore.Modules.Commands
                 result += $"{cast}/";
             }
             if (casters != null)
-                await ReplyAsync($"Check out the current multicasts via Multitwitch at http://multitwitch.tv/{result} or via Kadgar at http://kadgar.net/live/{result}");
+                await ReplyAsync($"Check out the current multi-casts via Multitwitch at http://multitwitch.tv/{result} or via Kadgar at http://kadgar.net/live/{result}");
         }
 
-        //Caster
         [Command("caster"), Summary("Caster announce command.")]
         public async Task CasterAsync(string tname = null)
         {
             if (tname != null)
             {
-                //string twitch = "https://www.twitch.tv/";
                 await ReplyAsync($"You should check out {tname} over at https://www.twitch.tv/{tname}");
             }
         }
 
-        //userinfo
         [Command("userinfo"), Alias("user", "whois"), Summary("Current or the specified user info.")]
         public async Task UserInfoAsync([Summary("The (optional) user to get info for")] SocketGuildUser user = null)
         {
@@ -352,19 +290,17 @@ namespace BluBotCore.Modules.Commands
                 $"User status: {userInfo.Status}\n" +
                 $"IsBot: {userInfo.IsBot}\n" +
                 $"Created On: {userInfo.CreatedAt}\n" +
-                $"Currently Playing: {userInfo.Activity}\n" +
                 $"Avatar Id: {userInfo.AvatarId}\n" +
                 $"Avatar URL: {userInfo.GetAvatarUrl()}"
                 );
         }
 
-        //guildinfo
         [Command("serverinfo"), Alias("server", "guildinfo", "guild"), Summary("Guild info.")]
         public async Task ServerInfoAsync()
         {
             IGuild guild = Context.Guild;
             var users = await guild.GetUsersAsync();
-            IGuildChannel defaultChan = await guild.GetChannelAsync(guild.DefaultChannelId);
+            IGuildChannel defaultChan = await guild.GetChannelAsync(guild.SystemChannelId.Value);
             IGuildUser owner = await guild.GetOwnerAsync();
             await ReplyAsync(
                 "Guild Info\n" +
@@ -372,23 +308,21 @@ namespace BluBotCore.Modules.Commands
                 $"Owner's ID: {guild.OwnerId} {owner.Username}#{owner.Discriminator}\n" +
                 $"Available: {guild.Available}\n" +
                 $"Created On: {guild.CreatedAt}\n" +
-                $"Default Channel ID: {guild.DefaultChannelId} {defaultChan.Name}\n" +
+                $"Default Channel ID: {guild.SystemChannelId.Value} {defaultChan.Name}\n" +
                 $"User Count: {users.Count}\n" +
                 $"Custom Emojis Count: {guild.Emotes.Count}\n" +
                 $"Guild Roles Count: {guild.Roles.Count}\n" +
                 $"Feature Count: {guild.Features.Count}\n" +
                 $"Verification Level: {guild.VerificationLevel}\n" +
                 $"MFA Level: {guild.MfaLevel}\n" +
-                $"Embeddable: {guild.IsEmbeddable}\n" +
                 $"Voice Region: {guild.VoiceRegionId}\n" +
                 $"Splash ID: {guild.SplashId}\n" +
-                $"Spalsh URL: {guild.SplashUrl}\n" +
+                $"Splash URL: {guild.SplashUrl}\n" +
                 $"Icon ID: {guild.IconId}\n" +
                 $"Icon URL: {guild.IconUrl}"
                 );
         }
 
-        //test
         [Command("test"), Alias("ping", "check"), Summary("Bot 'ping' test command.")]
         public async Task TestAsync()
         {
@@ -396,7 +330,6 @@ namespace BluBotCore.Modules.Commands
             await ReplyAsync(msg);
         }
 
-        
         [Command("encrypt")]
         [RequireContext(ContextType.DM)]
         [RequireRoleOrID]
