@@ -15,5 +15,20 @@ namespace BluBotCore
             else
                 return ".";
         }
+
+        public static string EditPreviewURL(string url)
+        {
+            if (NullEmptyCheck(url) == ".")
+            {
+                return ".";
+            }
+            else
+            {
+                string thumburl = url;
+                thumburl = thumburl.Replace("{width}", "320");
+                thumburl = thumburl.Replace("{height}", "180");
+                return thumburl;
+            }
+        }
     }
 }
