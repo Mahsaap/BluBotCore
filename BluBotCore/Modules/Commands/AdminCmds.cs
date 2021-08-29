@@ -65,38 +65,6 @@ namespace BluBotCore.Modules.Commands
             File.WriteAllLines(filename, tempLst);
         }
 
-        [Command("SetLogChannel")]
-        public async Task LogChannelSet(IGuildChannel chan)
-        {
-            Setup.DiscordLogChannel = chan.Id;
-            await ReplyAsync($"Log Channel set as {chan.Name} - ({chan.Id})");
-            const string filename = "setup.txt";
-            var tempLst = new List<string>()
-            {
-                Setup.DiscordAnnounceChannel.ToString(),
-                Setup.DiscordStaffRole.ToString(),
-                Setup.DiscordWYKTVRole.ToString(),
-                Setup.DiscordLogChannel.ToString()
-            };
-            File.WriteAllLines(filename, tempLst);
-        }
-
-        [Command("DisableLogChannel")]
-        public async Task DisableLogChannel()
-        {
-            Setup.DiscordLogChannel = 0;
-            await ReplyAsync($"Log Channel has been disabled.");
-            const string filename = "setup.txt";
-            var tempLst = new List<string>()
-            {
-                Setup.DiscordAnnounceChannel.ToString(),
-                Setup.DiscordStaffRole.ToString(),
-                Setup.DiscordWYKTVRole.ToString(),
-                Setup.DiscordLogChannel.ToString()
-            };
-            File.WriteAllLines(filename, tempLst);
-        }
-
         [Command("botinfo"), Summary("Bot framework info.")]
         public async Task BotInfoAsync()
         {
@@ -131,9 +99,7 @@ namespace BluBotCore.Modules.Commands
                 x.Name = "**Libraries**";
                 x.Value = "" +
                 $"Discord.Net ({DiscordConfig.Version})\n" +
-                "TwitchLib.API 3.1.4\n" +
-                "StrawPollNet 1.0.2\n" +
-                "SteamStoreQuery 1.0.4";
+                "TwitchLib.API 3.2.5-Dev";
                 x.IsInline = false;
             });
             eb.AddField(x =>
@@ -149,21 +115,6 @@ namespace BluBotCore.Modules.Commands
                 $"Heap Size: {GetHeapSize()} MB\n" +
                 $"Latency: {Context.Client.Latency}ms\n";
                 x.IsInline = true;
-            });
-            string guildsStr = "";
-            foreach (SocketGuild guild in Context.Client.Guilds)
-            {
-                guildsStr += $"**{guild.Name}** ({guild.Id})\n" +
-                    $"- Members ({guild.MemberCount})\n" +
-                    $"- Channels ({guild.Channels.Count})>(V{guild.VoiceChannels.Count})(T{guild.TextChannels.Count})\n" +
-                    $"- Roles = {guild.Roles.Count}\n" +
-                    $"- Owner = {guild.Owner}({guild.OwnerId})\n";
-            }
-            eb.AddField(x =>
-            {
-                x.Name = "**Guilds**";
-                x.Value = $"{guildsStr}";
-                x.IsInline = false;
             });
             eb.WithFooter(x =>
             {

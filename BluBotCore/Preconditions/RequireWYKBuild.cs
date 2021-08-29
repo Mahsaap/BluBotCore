@@ -7,11 +7,6 @@ namespace BluBotCore.Preconditions
 {
     class RequireWYKBuild : PreconditionAttribute
     {
-        public RequireWYKBuild()
-        {
-            //################### Not Required - Test before removing. ######################
-        }
-
         public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
         {
             if (Version.Build == BuildType.WYK.Value)

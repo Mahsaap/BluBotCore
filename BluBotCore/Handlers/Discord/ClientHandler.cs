@@ -12,7 +12,6 @@ namespace BluBotCore.Handlers.Discord
         {
             _client = client;
 
-
             _client.Ready += Client_Ready;
         }
 

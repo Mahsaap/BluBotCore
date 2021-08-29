@@ -15,11 +15,6 @@ namespace BluBotCore.Preconditions
         private readonly static List<ulong> _requiredUserID = new(
             new ulong[] { DiscordIDs.Mahsaap, DiscordIDs.Space });
 
-        public RequireRoleOrID()
-        {
-            //################### Not Required - Test before removing. ######################
-        }
-
         public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
         {
             if (_requiredUserID.Contains(context.User.Id))

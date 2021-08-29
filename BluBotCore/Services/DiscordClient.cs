@@ -30,7 +30,7 @@ namespace BluBotCore.Services
             _client = new DiscordSocketClient(new DiscordSocketConfig
             {
                 WebSocketProvider = WS4NetProvider.Instance,
-                LogLevel = LogSeverity.Debug,
+                LogLevel = LogSeverity.Info,
                 MessageCacheSize = 100,
                 AlwaysDownloadUsers = true,
             });
@@ -56,12 +56,21 @@ namespace BluBotCore.Services
                         tmpList.Add(data);
                     file.Close();
                 }
-                Cred.DiscordTok = tmpList[0];
-                Cred.TwitchAPIID = tmpList[1];
-                Cred.TwitchAPISecret = tmpList[2];
-                Cred.TwitchAPIRefreshToken = tmpList[3];
-                Console.WriteLine($"{Globals.CurrentTime} Setup       File {filename} loaded!");
-                return true;
+                if (tmpList.Count <= 4)
+                {
+                    Cred.DiscordTok = tmpList[0];
+                    Cred.TwitchAPIID = tmpList[1];
+                    Cred.TwitchAPISecret = tmpList[2];
+                    Cred.TwitchAPIRefreshToken = tmpList[3];
+                    Console.WriteLine($"{Globals.CurrentTime} Setup       File {filename} loaded!");
+                    return true;
+                }
+                else
+                {
+                    Console.WriteLine($"{Globals.CurrentTime} Setup       File {filename} has {tmpList.Count} entries and should be 4!" +
+                        $"\n                     Please check {filename} and reboot the bot.");
+                    return false;
+                }
             }
             else
             {
@@ -109,7 +118,6 @@ namespace BluBotCore.Services
                     file.WriteLine(Setup.DiscordAnnounceChannel);
                     file.WriteLine(Setup.DiscordStaffRole);
                     file.WriteLine(Setup.DiscordWYKTVRole);
-                    file.WriteLine(Setup.DiscordLogChannel);
                     file.Flush();
                     file.Close();
                 }
@@ -126,7 +134,6 @@ namespace BluBotCore.Services
             Setup.DiscordAnnounceChannel = Convert.ToUInt64(tmpList[0]);
             Setup.DiscordStaffRole = Convert.ToUInt64(tmpList[1]);
             Setup.DiscordWYKTVRole = Convert.ToUInt64(tmpList[2]);
-            Setup.DiscordLogChannel = Convert.ToUInt64(tmpList[3]);
             Console.WriteLine($"{Globals.CurrentTime} Setup       File {filename} loaded!");
         }
 
@@ -143,7 +150,6 @@ namespace BluBotCore.Services
             .AddSingleton<CommandHandler>()
             .AddSingleton<LogHandler>()
             .AddSingleton<ClientHandler>()
-            .AddSingleton<UserHandler>()
             .AddSingleton<LiveMonitor>()
             .BuildServiceProvider();
         }
@@ -153,7 +159,6 @@ namespace BluBotCore.Services
             await service.GetRequiredService<CommandHandler>().InstallCommandsAsync();
             service.GetRequiredService<LogHandler>();
             service.GetRequiredService<ClientHandler>();
-            service.GetRequiredService<UserHandler>();
             service.GetRequiredService<LiveMonitor>();
         }
     }
