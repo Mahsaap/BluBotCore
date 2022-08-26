@@ -1,2 +1,2 @@
 # BluBotCore
-Custom Team Discord/Twitch bot. WIP
+Custom Team Discord/Twitch bot. WIP ***
