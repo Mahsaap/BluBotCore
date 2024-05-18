@@ -8,11 +8,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using TwitchLib;
 using TwitchLib.Api;
 using TwitchLib.Api.Core.Exceptions;
-using TwitchLib.Api.Helix;
-using TwitchLib.Api.Helix.Models;
 using TwitchLib.Api.Services;
 using TwitchLib.Api.Services.Events.LiveStreamMonitor;
 using BluBotCore.Global;
@@ -49,8 +46,8 @@ namespace BluBotCore.Services
                 API = new TwitchAPI();
                 try
                 {
-                    API.Settings.ClientId = AES.Decrypt(Cred.TwitchAPIID);
-                    API.Settings.Secret = AES.Decrypt(Cred.TwitchAPISecret);
+                    API.Settings.ClientId = Cred.TwitchAPIID;
+                    API.Settings.Secret = Cred.TwitchAPISecret;
                 }
                 catch (Exception ex)
                 {
@@ -73,17 +70,17 @@ namespace BluBotCore.Services
                             file.Close();
                         }
 
-                        tmpList[2] = AES.Encrypt(token.AccessToken);
-                        Cred.TwitchAPISecret = AES.Encrypt(token.AccessToken);
-                        tmpList[3] = AES.Encrypt(token.RefreshToken);
-                        Cred.TwitchAPIRefreshToken = AES.Encrypt(token.RefreshToken);
+                        tmpList[2] = token.AccessToken;
+                        Cred.TwitchAPISecret = token.AccessToken;
+                        tmpList[3] = token.RefreshToken;
+                        Cred.TwitchAPIRefreshToken = token.RefreshToken;
 
                         File.WriteAllLines("init.txt", tmpList);
 
                         await mahsaap.SendMessageAsync($"TwitchLib keys have been updated in file. Expires in {token.ExpiresIn}.");
 
-                        API.Settings.ClientId = AES.Decrypt(Cred.TwitchAPIID);
-                        API.Settings.AccessToken = AES.Decrypt(Cred.TwitchAPISecret);
+                        API.Settings.ClientId = Cred.TwitchAPIID;
+                        API.Settings.AccessToken = Cred.TwitchAPISecret;
                         Console.WriteLine($"{Globals.CurrentTime} Monitor     Tokens have been refreshed and updated!");
                     }
                 }
@@ -117,8 +114,12 @@ namespace BluBotCore.Services
                     if (_liveEmbeds.ContainsKey(e.Channel) && _client.ConnectionState == ConnectionState.Connected)
                     {
                         RestUserMessage embed = _liveEmbeds[e.Channel].Item1;
-                        await embed.DeleteAsync();
-                        _ = _liveEmbeds.TryRemove(e.Channel, out _);
+                        if (embed.Content.Contains("**No, OverBoredGaming is not live!**\n" +
+                            "But you can check out the rest of the WYK Team!\n" +
+                            "<https://www.twitch.tv/team/wyktv>")){
+                            await embed.DeleteAsync();
+                            _ = _liveEmbeds.TryRemove(e.Channel, out _);
+                        }
                     }
                 }
 
@@ -159,7 +160,7 @@ namespace BluBotCore.Services
                             "<https://www.twitch.tv/team/wyktv>";
                         await embed.ModifyAsync(x => x.Content = text);
                         await Task.Delay(250);
-                        await embed.ModifyAsync(x => x.Embed = null);
+                        await embed.ModifyAsync(x => x.Flags = MessageFlags.SuppressEmbeds);
                     }
                     if (Version.Build == BuildType.WYK.Value)
                     {
@@ -272,10 +273,10 @@ namespace BluBotCore.Services
                         }
                     }
 
-                    //if (teamBanner != null)
-                    //{
-                    //    await chan.SendMessageAsync(teamBanner);
-                    //}
+                    if (teamBanner != null)
+                    {
+                        await chan.SendMessageAsync(teamBanner);
+                    }
 
                     foreach (var s in teamStreams.Streams)
                     {
@@ -294,12 +295,12 @@ namespace BluBotCore.Services
 
                     if (Version.Build == BuildType.OBG.Value && teamStreams.Streams.Length == 0)
                     {
-                        var id = (await API.Helix.Users.GetUsersAsync(logins: new List<string> { "overboredgaming" })).Users[0].Id;
+                        var id = (await API.Helix.Users.GetUsersAsync(logins: new List<string> { "overboredgaming" })).Users[0];
                         string text = "**No, OverBoredGaming is not live!**\n" +
                             "But you can check out the rest of the WYK Team!\n" +
                             "<https://www.twitch.tv/team/wyktv>";
                         RestUserMessage msg = await chan.SendMessageAsync(text);
-                        _liveEmbeds.TryAdd(id, new Tuple<RestUserMessage, string, string, int>(msg, "", "", 0));
+                        _liveEmbeds.TryAdd(id.Id, new Tuple<RestUserMessage, string, string, int>(msg, "", "", 0));
                         await Task.CompletedTask;
                     }
                 }

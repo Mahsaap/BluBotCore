@@ -312,7 +312,7 @@ namespace BluBotCore.Modules.Commands
                 $"User Count: {users.Count}\n" +
                 $"Custom Emojis Count: {guild.Emotes.Count}\n" +
                 $"Guild Roles Count: {guild.Roles.Count}\n" +
-                $"Feature Count: {guild.Features.Count}\n" +
+                //$"Feature Count: {guild.Features.Count}\n" +
                 $"Verification Level: {guild.VerificationLevel}\n" +
                 $"MFA Level: {guild.MfaLevel}\n" +
                 $"Voice Region: {guild.VoiceRegionId}\n" +
@@ -328,15 +328,6 @@ namespace BluBotCore.Modules.Commands
         {
             string msg = $"Pong! - {Context.Client.Latency}ms";
             await ReplyAsync(msg);
-        }
-
-        [Command("encrypt")]
-        [RequireContext(ContextType.DM)]
-        [RequireRoleOrID]
-        public async Task VerifyAsync(string entry)
-        {
-            string result = AES.Encrypt(entry);
-            await ReplyAsync(result);
         }
 
         private static string GetUptime()

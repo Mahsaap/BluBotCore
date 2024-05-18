@@ -29,6 +29,7 @@ namespace BluBotCore.Services
         {
             _client = new DiscordSocketClient(new DiscordSocketConfig
             {
+                GatewayIntents = GatewayIntents.All,
                 WebSocketProvider = WS4NetProvider.Instance,
                 LogLevel = LogSeverity.Info,
                 MessageCacheSize = 100,
@@ -38,7 +39,7 @@ namespace BluBotCore.Services
             IServiceProvider service = ConfigServices();
             await GetRequiredServicesAsync(service);
 
-            await _client.LoginAsync(TokenType.Bot, AES.Decrypt(Cred.DiscordTok));
+            await _client.LoginAsync(TokenType.Bot, Cred.DiscordTok);
             await _client.StartAsync();
             await Task.Delay(-1);
         }
@@ -88,10 +89,10 @@ namespace BluBotCore.Services
                 string twitchapiRefreshToken = Console.ReadLine();
                 Console.Clear();
 
-                string data0 = AES.Encrypt(discordToken);
-                string data1 = AES.Encrypt(twitchapiID);
-                string data2 = AES.Encrypt(twitchapiSecret);
-                string data3 = AES.Encrypt(twitchapiRefreshToken);
+                string data0 = discordToken;
+                string data1 = twitchapiID;
+                string data2 = twitchapiSecret;
+                string data3 = twitchapiRefreshToken;
 
                 using (StreamWriter file = new(filename, true, Encoding.UTF8))
                 {

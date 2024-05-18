@@ -38,13 +38,5 @@ namespace BluBotCore.Modules.Commands
             };
             File.WriteAllLines(filename, tempLst);
         }
-
-        [Command("decrypt")]
-        [RequireContext(ContextType.DM)]
-        public async Task VerifyDecryptAsync(string entry)
-        {
-            string result = AES.Decrypt(entry);
-            await ReplyAsync(result);
-        }
     }
 }
