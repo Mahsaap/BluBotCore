@@ -5,11 +5,14 @@ using Discord.Commands;
 using Discord.Net.Providers.WS4Net;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using TwitchLib.EventSub.Core;
+using TwitchLib.EventSub.Webhooks;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using TwitchLib.EventSub.Webhooks.Extensions;
 
 namespace BluBotCore.Services
 {
@@ -152,6 +155,7 @@ namespace BluBotCore.Services
             .AddSingleton<LogHandler>()
             .AddSingleton<ClientHandler>()
             .AddSingleton<LiveMonitor>()
+            //.AddSingleton<EventSubHostedService>()
             .BuildServiceProvider();
         }
 
@@ -161,6 +165,19 @@ namespace BluBotCore.Services
             service.GetRequiredService<LogHandler>();
             service.GetRequiredService<ClientHandler>();
             service.GetRequiredService<LiveMonitor>();
+        }
+
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddControllers();
+            services.AddTwitchLibEventSubWebhooks(config =>
+            {
+                config.CallbackPath = "/webhooks";
+                config.Secret = "supersecuresecret";
+                config.EnableLogging = true;
+            });
+
+            services.AddHostedService<EventSubHostedService>();
         }
     }
 }

@@ -13,10 +13,15 @@ using TwitchLib.Api.Core.Exceptions;
 using TwitchLib.Api.Services;
 using TwitchLib.Api.Services.Events.LiveStreamMonitor;
 using BluBotCore.Global;
+using Microsoft.Extensions.Hosting;
+using System.Threading;
+using TwitchLib.Api.Core.Enums;
+using TwitchLib.Api.Interfaces;
+using TwitchLib.EventSub.Webhooks.Core;
 
 namespace BluBotCore.Services
 {
-    public class LiveMonitor
+    public class LiveMonitor : IHostedService
     {
 
         private readonly DiscordSocketClient _client;
@@ -25,83 +30,112 @@ namespace BluBotCore.Services
         private static string teamBanner;
         private static readonly ConcurrentDictionary<string, Tuple<RestUserMessage, string, string, int>> concurrentDictionary = new();
         private static ConcurrentDictionary<string, Tuple<RestUserMessage, string, string, int>> _liveEmbeds = concurrentDictionary;
-        public LiveStreamMonitorService Monitor { get; private set; }
+        //public LiveStreamMonitorService Monitor { get; private set; }
         public TwitchAPI API { get; private set; }
         public static Dictionary<String, String> MonitoredChannels { get; } = new Dictionary<string, string>();
+
 
         public LiveMonitor(DiscordSocketClient client)
         {
             _client = client;
-            Task.Run(() => ConfigLiveMonitorAsync());
         }
 
-        private async Task ConfigLiveMonitorAsync()
+        //private async Task ConfigLiveMonitorAsync()
+        //{
+        //    while (_client.ConnectionState != ConnectionState.Connected)
+        //    {
+        //        await Task.Delay(2000);
+        //    }
+        //    try
+        //    {
+        //        API = new TwitchAPI();
+        //        try
+        //        {
+        //            API.Settings.ClientId = Cred.TwitchAPIID;
+        //            API.Settings.Secret = Cred.TwitchAPISecret;
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            // Token Expired Refresh Sequence.
+        //            if (ex is TokenExpiredException)
+        //            {
+        //                var mahsaap = (_client.GetUser(DiscordIDs.Mahsaap) as IUser);
+        //                await mahsaap.SendMessageAsync("TwitchLib token has expired.");
+
+        //                var token = await API.Auth.RefreshAuthTokenAsync(
+        //                    Cred.TwitchAPIRefreshToken, Cred.TwitchAPISecret, Cred.TwitchAPIID);
+        //                await mahsaap.SendMessageAsync("TwitchLib token has been refreshed.");
+
+        //                List<string> tmpList = new();
+        //                using (StreamReader file = new("init.txt"))
+        //                {
+        //                    string dataOld;
+        //                    while ((dataOld = file.ReadLine()) != null)
+        //                        tmpList.Add(dataOld);
+        //                    file.Close();
+        //                }
+
+        //                tmpList[2] = token.AccessToken;
+        //                Cred.TwitchAPISecret = token.AccessToken;
+        //                tmpList[3] = token.RefreshToken;
+        //                Cred.TwitchAPIRefreshToken = token.RefreshToken;
+
+        //                File.WriteAllLines("init.txt", tmpList);
+
+        //                await mahsaap.SendMessageAsync($"TwitchLib keys have been updated in file. Expires in {token.ExpiresIn}.");
+
+        //                API.Settings.ClientId = Cred.TwitchAPIID;
+        //                API.Settings.AccessToken = Cred.TwitchAPISecret;
+        //                Console.WriteLine($"{Globals.CurrentTime} Monitor     Tokens have been refreshed and updated!");
+        //            }
+        //        }
+
+
+                //Monitor = new LiveStreamMonitorService(API, 300);
+
+                //Console.WriteLine($"{Globals.CurrentTime} Monitor     Instance Created");
+                //await SetCastersAsync();
+
+                //Monitor.OnStreamOnline += Monitor_OnStreamOnlineAsync;
+                //Monitor.OnStreamOffline += Monitor_OnStreamOfflineAsync;
+                //Monitor.OnStreamUpdate += Monitor_OnStreamUpdateAsync;
+                //Monitor.OnServiceStarted += Monitor_OnServiceStartedAsync;
+                //Monitor.OnChannelsSet += Monitor_OnChannelsSet;
+                //Monitor.Start();
+        //        //await Task.Delay(-1);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine(ex.Message + "\n" + ex.StackTrace);
+        //    }
+        //}
+
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
-            while (_client.ConnectionState != ConnectionState.Connected)
-            {
-                await Task.Delay(2000);
-            }
-            try
-            {
-                API = new TwitchAPI();
-                try
+            API = new TwitchAPI();
+            API.Settings.ClientId = Cred.TwitchAPIID;
+            API.Settings.AccessToken = Cred.TwitchAPISecret;
+
+            var conditions = new Dictionary<string, string>()
                 {
-                    API.Settings.ClientId = Cred.TwitchAPIID;
-                    API.Settings.Secret = Cred.TwitchAPISecret;
-                }
-                catch (Exception ex)
-                {
-                    // Token Expired Refresh Sequence.
-                    if (ex is TokenExpiredException)
-                    {
-                        var mahsaap = (_client.GetUser(DiscordIDs.Mahsaap) as IUser);
-                        await mahsaap.SendMessageAsync("TwitchLib token has expired.");
+                { "broadcaster_user_id", "" }
+            };
 
-                        var token = await API.Auth.RefreshAuthTokenAsync(
-                            AES.Decrypt(Cred.TwitchAPIRefreshToken), AES.Decrypt(Cred.TwitchAPISecret), AES.Decrypt(Cred.TwitchAPIID));
-                        await mahsaap.SendMessageAsync("TwitchLib token has been refreshed.");
+            await API.Helix.EventSub.CreateEventSubSubscriptionAsync("channel.update", "2", conditions,
+                EventSubTransportMethod.Webhook, webhookCallback: "/webhooks", webhookSecret: "");
+            await API.Helix.EventSub.CreateEventSubSubscriptionAsync("stream.online", "1", conditions,
+                EventSubTransportMethod.Webhook, webhookCallback: "/webhooks", webhookSecret: "");
+            await API.Helix.EventSub.CreateEventSubSubscriptionAsync("stream.offline", "1", conditions,
+                EventSubTransportMethod.Webhook, webhookCallback: "/webhooks", webhookSecret: "");
 
-                        List<string> tmpList = new();
-                        using (StreamReader file = new("init.txt"))
-                        {
-                            string dataOld;
-                            while ((dataOld = file.ReadLine()) != null)
-                                tmpList.Add(dataOld);
-                            file.Close();
-                        }
+            var subscriptionResponse = API.Helix.EventSub.GetEventSubSubscriptionsAsync(userId: "");
+            //return Task.CompletedTask;
+        }
 
-                        tmpList[2] = token.AccessToken;
-                        Cred.TwitchAPISecret = token.AccessToken;
-                        tmpList[3] = token.RefreshToken;
-                        Cred.TwitchAPIRefreshToken = token.RefreshToken;
-
-                        File.WriteAllLines("init.txt", tmpList);
-
-                        await mahsaap.SendMessageAsync($"TwitchLib keys have been updated in file. Expires in {token.ExpiresIn}.");
-
-                        API.Settings.ClientId = Cred.TwitchAPIID;
-                        API.Settings.AccessToken = Cred.TwitchAPISecret;
-                        Console.WriteLine($"{Globals.CurrentTime} Monitor     Tokens have been refreshed and updated!");
-                    }
-                }
-
-                Monitor = new LiveStreamMonitorService(API, 300);
-
-                Console.WriteLine($"{Globals.CurrentTime} Monitor     Instance Created");
-                await SetCastersAsync();
-
-                Monitor.OnStreamOnline += Monitor_OnStreamOnlineAsync;
-                Monitor.OnStreamOffline += Monitor_OnStreamOfflineAsync;
-                Monitor.OnStreamUpdate += Monitor_OnStreamUpdateAsync;
-                Monitor.OnServiceStarted += Monitor_OnServiceStartedAsync;
-                Monitor.OnChannelsSet += Monitor_OnChannelsSet;
-                Monitor.Start();
-                await Task.Delay(-1);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message + "\n" + ex.StackTrace);
-            }
+        public async Task StopAsync(CancellationToken cancellationToken)
+        {
+            await API.Helix.EventSub.DeleteEventSubSubscriptionAsync()
+            //return Task.CompletedTask;
         }
 
         private async void Monitor_OnStreamOnlineAsync(object sender, OnStreamOnlineArgs e)
@@ -189,7 +223,7 @@ namespace BluBotCore.Services
                         //Check Team Count
                         if (teamTemp.Users.Length != MonitoredChannels.Count)
                         {
-                            await UpdateMonitorAsync();
+                            //await UpdateMonitorAsync();
                             return;
                         }
                         else
@@ -203,7 +237,7 @@ namespace BluBotCore.Services
                             }
                             if (count > 0)
                             {
-                                await UpdateMonitorAsync();
+                                //await UpdateMonitorAsync();
                                 return;
                             }
                         }
@@ -252,7 +286,7 @@ namespace BluBotCore.Services
             _liveEmbeds.Clear();
             try
             {
-                var teamStreams = await API.Helix.Streams.GetStreamsAsync(userIds: Monitor.ChannelsToMonitor);
+                //var teamStreams = await API.Helix.Streams.GetStreamsAsync(userIds: Monitor.ChannelsToMonitor);
 
                 if (_client.ConnectionState == ConnectionState.Connected)
                 {
@@ -278,31 +312,31 @@ namespace BluBotCore.Services
                         await chan.SendMessageAsync(teamBanner);
                     }
 
-                    foreach (var s in teamStreams.Streams)
-                    {
-                        if (s.Type == "live")
-                        {
-                            var user = (await API.Helix.Users.GetUsersAsync(ids: new List<string> { s.UserId })).Users[0];
-                            string thumburl = Globals.EditPreviewURL(s.ThumbnailUrl);
-                            EmbedBuilder eb = SetupLiveEmbed($":link: {s.UserName}", s.Title, s.GameName,
-                            thumburl + Guid.NewGuid(), user.ProfileImageUrl, @"https://www.twitch.tv/" + s.UserName);
+                    //foreach (var s in teamStreams.Streams)
+                    //{
+                    //    if (s.Type == "live")
+                    //    {
+                    //        var user = (await API.Helix.Users.GetUsersAsync(ids: new List<string> { s.UserId })).Users[0];
+                    //        string thumburl = Globals.EditPreviewURL(s.ThumbnailUrl);
+                    //        EmbedBuilder eb = SetupLiveEmbed($":link: {s.UserName}", s.Title, s.GameName,
+                    //        thumburl + Guid.NewGuid(), user.ProfileImageUrl, @"https://www.twitch.tv/" + s.UserName);
 
-                            Console.WriteLine($"{Globals.CurrentTime} Monitor     {s.UserName} is live playing {s.GameName}");
-                            await Task.Delay(2000);
-                            await SetupEmbedMessageAsync(eb, s);
-                        }
-                    }
+                    //        Console.WriteLine($"{Globals.CurrentTime} Monitor     {s.UserName} is live playing {s.GameName}");
+                    //        await Task.Delay(2000);
+                    //        await SetupEmbedMessageAsync(eb, s);
+                    //    }
+                    //}
 
-                    if (Version.Build == BuildType.OBG.Value && teamStreams.Streams.Length == 0)
-                    {
-                        var id = (await API.Helix.Users.GetUsersAsync(logins: new List<string> { "overboredgaming" })).Users[0];
-                        string text = "**No, OverBoredGaming is not live!**\n" +
-                            "But you can check out the rest of the WYK Team!\n" +
-                            "<https://www.twitch.tv/team/wyktv>";
-                        RestUserMessage msg = await chan.SendMessageAsync(text);
-                        _liveEmbeds.TryAdd(id.Id, new Tuple<RestUserMessage, string, string, int>(msg, "", "", 0));
-                        await Task.CompletedTask;
-                    }
+                    //if (Version.Build == BuildType.OBG.Value && teamStreams.Streams.Length == 0)
+                    //{
+                    //    var id = (await API.Helix.Users.GetUsersAsync(logins: new List<string> { "overboredgaming" })).Users[0];
+                    //    string text = "**No, OverBoredGaming is not live!**\n" +
+                    //        "But you can check out the rest of the WYK Team!\n" +
+                    //        "<https://www.twitch.tv/team/wyktv>";
+                    //    RestUserMessage msg = await chan.SendMessageAsync(text);
+                    //    _liveEmbeds.TryAdd(id.Id, new Tuple<RestUserMessage, string, string, int>(msg, "", "", 0));
+                    //    await Task.CompletedTask;
+                    //}
                 }
             }
             catch (Exception ex)
@@ -382,7 +416,7 @@ namespace BluBotCore.Services
                     var chan = (await API.Helix.Users.GetUsersAsync(logins: new List<string> { "overboredgaming" })).Users[0];
                     MonitoredChannels.Add(chan.DisplayName, chan.Id);
                 }
-                Monitor.SetChannelsById(MonitoredChannels.Values.ToList());
+                //Monitor.SetChannelsById(MonitoredChannels.Values.ToList());
             }
             catch (Exception ex)
             {
@@ -390,48 +424,48 @@ namespace BluBotCore.Services
             }
         }
 
-        public async Task<bool> UpdateMonitorAsync(string channel = null)
-        {
-            if (channel == null) {
-                Monitor.Stop();
-                MonitoredChannels.Clear();
-                await SetCastersAsync();
-                Monitor.Start();
-                return true;
-            }
-            else
-            {
-                try
-                {
-                    var s = (await API.Helix.Streams.GetStreamsAsync(userLogins: new List<string> { channel })).Streams[0];
-                    if (_liveEmbeds.ContainsKey(channel))
-                    {
-                        if (_client.ConnectionState == ConnectionState.Connected)
-                        {
-                            if (Setup.DiscordAnnounceChannel == 0) return false;
-                            var msg = _liveEmbeds[s.UserId];
+        //public async Task<bool> UpdateMonitorAsync(string channel = null)
+        //{
+        //    if (channel == null) {
+        //        Monitor.Stop();
+        //        MonitoredChannels.Clear();
+        //        await SetCastersAsync();
+        //        Monitor.Start();
+        //        return true;
+        //    }
+        //    else
+        //    {
+        //        try
+        //        {
+        //            var s = (await API.Helix.Streams.GetStreamsAsync(userLogins: new List<string> { channel })).Streams[0];
+        //            if (_liveEmbeds.ContainsKey(channel))
+        //            {
+        //                if (_client.ConnectionState == ConnectionState.Connected)
+        //                {
+        //                    if (Setup.DiscordAnnounceChannel == 0) return false;
+        //                    var msg = _liveEmbeds[s.UserId];
 
-                            string thumburl = Globals.EditPreviewURL(s.ThumbnailUrl);
-                            var user = (await API.Helix.Users.GetUsersAsync(ids: new List<string> { $"{s.UserId}" })).Users[0];
-                            EmbedBuilder eb = SetupLiveEmbed($":link: {s.UserName}", s.Title, s.GameName,
-                                thumburl + Guid.NewGuid().ToString(), user.ProfileImageUrl, @"https://www.twitch.tv/" + s.UserName);
+        //                    string thumburl = Globals.EditPreviewURL(s.ThumbnailUrl);
+        //                    var user = (await API.Helix.Users.GetUsersAsync(ids: new List<string> { $"{s.UserId}" })).Users[0];
+        //                    EmbedBuilder eb = SetupLiveEmbed($":link: {s.UserName}", s.Title, s.GameName,
+        //                        thumburl + Guid.NewGuid().ToString(), user.ProfileImageUrl, @"https://www.twitch.tv/" + s.UserName);
 
-                            await msg.Item1.ModifyAsync(x => x.Embed = eb.Build());
-                            _liveEmbeds[s.UserId] = new Tuple<RestUserMessage, string, string,int>(msg.Item1, s.Title, s.GameName, s.ViewerCount);
+        //                    await msg.Item1.ModifyAsync(x => x.Embed = eb.Build());
+        //                    _liveEmbeds[s.UserId] = new Tuple<RestUserMessage, string, string,int>(msg.Item1, s.Title, s.GameName, s.ViewerCount);
 
-                            Console.WriteLine($"{Globals.CurrentTime} Monitor     Stream {s.UserName} updated");
-                            return true;
-                        }
-                    }
-                    return false;
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.ToString());
-                    return false;
-                }
-            }
-        }
+        //                    Console.WriteLine($"{Globals.CurrentTime} Monitor     Stream {s.UserName} updated");
+        //                    return true;
+        //                }
+        //            }
+        //            return false;
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            Console.WriteLine(ex.ToString());
+        //            return false;
+        //        }
+        //    }
+        //}
 
         public async Task<bool> RemoveLiveEmbedAsync(string channel)
         {

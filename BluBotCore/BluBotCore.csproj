@@ -28,12 +28,16 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.1" />
     <PackageReference Include="TwitchLib.Api" Version="3.10.0-preview-aafc9bc" />
+    <PackageReference Include="TwitchLib.EventSub.Webhooks" Version="2.3.0" />
   </ItemGroup>
 
   <ItemGroup>
     <None Update="setup.txt">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+        <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
+	<None Update="init.txt">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	</None>
   </ItemGroup>
 
 </Project>

@@ -1,14 +1,23 @@
 ﻿using BluBotCore.Services;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using System.Threading.Tasks;
+using TwitchLib.Api.Helix.Models.Entitlements;
 
 namespace BluBotCore
 {
     class Program
     {
-        public static async Task Main()
+        public static void Main(string[] args)
         {
-            DiscordClient _discord = new();
-            await _discord.MainAsync();
+            CreateHostBuilder(args).Build().Run();
         }
+
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
     }
 }
