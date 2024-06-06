@@ -1,8 +1,7 @@
 ﻿using BluBotCore.Services;
-using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Threading.Tasks;
-using TwitchLib.Api.Helix.Models.Entitlements;
+using TwitchLib.EventSub.Websockets.Extensions;
 
 namespace BluBotCore
 {
@@ -13,11 +12,14 @@ namespace BluBotCore
             CreateHostBuilder(args).Build().Run();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
+        private static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
+                .ConfigureServices((hostContext, services) =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    services.AddLogging();
+                    services.AddTwitchLibEventSubWebsockets();
+
+                    services.AddHostedService<EventSubHostedService>();
                 });
     }
 }

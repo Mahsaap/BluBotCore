@@ -128,13 +128,18 @@ namespace BluBotCore.Services
             await API.Helix.EventSub.CreateEventSubSubscriptionAsync("stream.offline", "1", conditions,
                 EventSubTransportMethod.Webhook, webhookCallback: "/webhooks", webhookSecret: "");
 
-            var subscriptionResponse = API.Helix.EventSub.GetEventSubSubscriptionsAsync(userId: "");
+            //var subscriptionResponse = await API.Helix.EventSub.GetEventSubSubscriptionsAsync(userId: "");
             //return Task.CompletedTask;
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
-            await API.Helix.EventSub.DeleteEventSubSubscriptionAsync()
+            var subscriptionResponse = await API.Helix.EventSub.GetEventSubSubscriptionsAsync(userId: "");
+
+            foreach (var sub in subscriptionResponse.Subscriptions)
+            {
+                await API.Helix.EventSub.DeleteEventSubSubscriptionAsync(sub.Id);
+            }
             //return Task.CompletedTask;
         }
 

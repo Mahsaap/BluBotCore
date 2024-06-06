@@ -26,9 +26,11 @@
     <PackageReference Include="Discord.Net.Webhook" Version="3.15.0" />
     <PackageReference Include="Discord.Net.WebSocket" Version="3.15.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
     <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.1" />
-    <PackageReference Include="TwitchLib.Api" Version="3.10.0-preview-aafc9bc" />
-    <PackageReference Include="TwitchLib.EventSub.Webhooks" Version="2.3.0" />
+    <PackageReference Include="TwitchLib.Api" Version="3.10.0-preview-e47ba7f" />
+    <PackageReference Include="TwitchLib.EventSub.Websockets" Version="0.5.0-preview-bcfc70a" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,6 +40,10 @@
 	<None Update="init.txt">
 	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	</None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
 
 </Project>
