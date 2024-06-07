@@ -5,15 +5,17 @@ using Discord.Commands;
 using Discord.Net.Providers.WS4Net;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace BluBotCore.Services
 {
-    class DiscordClient
+    public class DiscordClient : IHostedService
     {
         public DiscordSocketClient _client;
 
@@ -25,7 +27,7 @@ namespace BluBotCore.Services
             else await StartAsync();
         }
 
-        public async Task StartAsync()
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
             _client = new DiscordSocketClient(new DiscordSocketConfig
             {
@@ -44,13 +46,44 @@ namespace BluBotCore.Services
             await Task.Delay(-1);
         }
 
+        public async Task StopAsync(CancellationToken cancellationToken)
+        {
+
+        }
+
+        private IServiceProvider ConfigServices()
+        {
+            return new ServiceCollection()
+            .AddSingleton(_client)
+            .AddSingleton(new CommandService(new CommandServiceConfig
+            {
+                ThrowOnError = true,
+                CaseSensitiveCommands = false,
+                DefaultRunMode = RunMode.Async
+            }))
+            .AddSingleton<CommandHandler>()
+            .AddSingleton<LogHandler>()
+            .AddSingleton<ClientHandler>()
+            .AddSingleton<LiveMonitor>()
+            //.AddSingleton<EventSubHostedService>()
+            .BuildServiceProvider();
+        }
+
+        private static async Task GetRequiredServicesAsync(IServiceProvider service)
+        {
+            await service.GetRequiredService<CommandHandler>().InstallCommandsAsync();
+            service.GetRequiredService<LogHandler>();
+            service.GetRequiredService<ClientHandler>();
+            service.GetRequiredService<LiveMonitor>();
+        }
+
         private static bool CheckInitFile()
         {
             string filename = "init.txt";
             if (File.Exists(filename))
             {
                 string data;
-                List<string> tmpList = new();
+                List<string> tmpList = [];
                 using (StreamReader file = new(filename))
                 {
                     while ((data = file.ReadLine()) != null)
@@ -124,7 +157,7 @@ namespace BluBotCore.Services
                 }
                 Console.WriteLine($"{Globals.CurrentTime} Setup       File {filename} created!");
             }
-            List<string> tmpList = new();
+            List<string> tmpList = [];
             string data;
             using (StreamReader file = new(filename))
             {
@@ -138,30 +171,6 @@ namespace BluBotCore.Services
             Console.WriteLine($"{Globals.CurrentTime} Setup       File {filename} loaded!");
         }
 
-        private IServiceProvider ConfigServices()
-        {
-            return new ServiceCollection()
-            .AddSingleton(_client)
-            .AddSingleton(new CommandService(new CommandServiceConfig
-            {
-                ThrowOnError = true,
-                CaseSensitiveCommands = false,
-                DefaultRunMode = RunMode.Async
-            }))
-            .AddSingleton<CommandHandler>()
-            .AddSingleton<LogHandler>()
-            .AddSingleton<ClientHandler>()
-            .AddSingleton<LiveMonitor>()
-            //.AddSingleton<EventSubHostedService>()
-            .BuildServiceProvider();
-        }
 
-        private async Task GetRequiredServicesAsync(IServiceProvider service)
-        {
-            await service.GetRequiredService<CommandHandler>().InstallCommandsAsync();
-            service.GetRequiredService<LogHandler>();
-            service.GetRequiredService<ClientHandler>();
-            service.GetRequiredService<LiveMonitor>();
-        }
     }
 }

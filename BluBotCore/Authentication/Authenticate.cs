@@ -7,14 +7,14 @@ namespace BluBotCore.Authentication
 {
     public class Authenticate
     {
-        private static List<string> scopes = new List<string> { "chat:read", "whispers:read", "whispers:edit", "chat:edit", "channel:moderate" };
+        private static readonly List<string> scopes = ["chat:read", "whispers:read", "whispers:edit", "chat:edit", "channel:moderate"];
 
         static async Task AuthenticateAsync()
         {
             Console.WriteLine("Twitch user access token example.");
 
             // ensure client id, secret, and redrect url are set
-            validateCreds();
+            ValidateCreds();
 
             // create twitch api instance
             var api = new TwitchLib.Api.TwitchAPI();
@@ -24,7 +24,7 @@ namespace BluBotCore.Authentication
             var server = new WebServer(Config.TwitchRedirectUri);
 
             // print out auth url
-            Console.WriteLine($"Please authorize here:\n{getAuthorizationCodeUrl(Config.TwitchClientId, Config.TwitchRedirectUri, scopes)}");
+            Console.WriteLine($"Please authorize here:\n{GetAuthorizationCodeUrl(Config.TwitchClientId, Config.TwitchRedirectUri, scopes)}");
 
             // listen for incoming requests
             var auth = await server.Listen();
@@ -55,7 +55,7 @@ namespace BluBotCore.Authentication
             Console.ReadLine();
         }
 
-        private static string getAuthorizationCodeUrl(string clientId, string redirectUri, List<string> scopes)
+        private static string GetAuthorizationCodeUrl(string clientId, string redirectUri, List<string> scopes)
         {
             var scopesStr = String.Join('+', scopes);
 
@@ -66,7 +66,7 @@ namespace BluBotCore.Authentication
                    $"scope={scopesStr}";
         }
 
-        private static void validateCreds()
+        private static void ValidateCreds()
         {
             if (String.IsNullOrEmpty(Config.TwitchClientId))
                 throw new Exception("client id cannot be null or empty");

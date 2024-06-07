@@ -10,14 +10,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using TwitchLib.Api;
 using TwitchLib.Api.Core.Exceptions;
-using TwitchLib.Api.Services;
 using TwitchLib.Api.Services.Events.LiveStreamMonitor;
 using BluBotCore.Global;
 using Microsoft.Extensions.Hosting;
 using System.Threading;
 using TwitchLib.Api.Core.Enums;
-using TwitchLib.Api.Interfaces;
-using TwitchLib.EventSub.Webhooks.Core;
 
 namespace BluBotCore.Services
 {
@@ -32,7 +29,7 @@ namespace BluBotCore.Services
         private static ConcurrentDictionary<string, Tuple<RestUserMessage, string, string, int>> _liveEmbeds = concurrentDictionary;
         //public LiveStreamMonitorService Monitor { get; private set; }
         public TwitchAPI API { get; private set; }
-        public static Dictionary<String, String> MonitoredChannels { get; } = new Dictionary<string, string>();
+        public static Dictionary<String, String> MonitoredChannels { get; } = [];
 
 
         public LiveMonitor(DiscordSocketClient client)
@@ -150,9 +147,9 @@ namespace BluBotCore.Services
                 var s = (await API.Helix.Streams.GetStreamsAsync(userIds: new List<string>{ e.Channel })).Streams[0];
                 if (Version.Build == BuildType.OBG.Value)
                 {
-                    if (_liveEmbeds.ContainsKey(e.Channel) && _client.ConnectionState == ConnectionState.Connected)
+                    if (_liveEmbeds.TryGetValue(e.Channel, out Tuple<RestUserMessage, string, string, int> value) && _client.ConnectionState == ConnectionState.Connected)
                     {
-                        RestUserMessage embed = _liveEmbeds[e.Channel].Item1;
+                        RestUserMessage embed = value.Item1;
                         if (embed.Content.Contains("**No, OverBoredGaming is not live!**\n" +
                             "But you can check out the rest of the WYK Team!\n" +
                             "<https://www.twitch.tv/team/wyktv>")){
@@ -189,11 +186,11 @@ namespace BluBotCore.Services
                 var s = (await API.Helix.Users.GetUsersAsync(ids: new List<string> { e.Channel })).Users[0];
                 Console.WriteLine($"{Globals.CurrentTime} Monitor     {s.DisplayName} is offline");
 
-                if (_liveEmbeds.ContainsKey(e.Channel) && _client.ConnectionState == ConnectionState.Connected)
+                if (_liveEmbeds.TryGetValue(e.Channel, out Tuple<RestUserMessage, string, string, int> value) && _client.ConnectionState == ConnectionState.Connected)
                 {
                     if (Version.Build == BuildType.OBG.Value)
                     {
-                        RestUserMessage embed = _liveEmbeds[e.Channel].Item1;
+                        RestUserMessage embed = value.Item1;
                         string text = "**No, OverBoredGaming is not live!**\n" +
                             "But you can check out the rest of the WYK Team!\n" +
                             "<https://www.twitch.tv/team/wyktv>";
@@ -204,7 +201,7 @@ namespace BluBotCore.Services
                     if (Version.Build == BuildType.WYK.Value)
                     {
                         await Task.Delay(250);
-                        RestUserMessage embed = _liveEmbeds[e.Channel].Item1;
+                        RestUserMessage embed = value.Item1;
                         await embed.DeleteAsync();
                         _ = _liveEmbeds.TryRemove(e.Channel, out _);
                     }
@@ -257,16 +254,16 @@ namespace BluBotCore.Services
 
             var s = (await API.Helix.Streams.GetStreamsAsync(userIds: new List<string> { e.Channel })).Streams[0];
 
-            if (_liveEmbeds.ContainsKey(e.Channel))
+            if (_liveEmbeds.TryGetValue(e.Channel, out Tuple<RestUserMessage, string, string, int> value))
             {
                 if (_client.ConnectionState == ConnectionState.Connected)
                 {
                     if (Setup.DiscordAnnounceChannel == 0) return;
                     if (Version.Build == BuildType.OBG.Value)
                     {
-                        if (_liveEmbeds[e.Channel].Item1.Embeds.Count == 0) return;
+                        if (value.Item1.Embeds.Count == 0) return;
                     }
-                    var msg = _liveEmbeds[e.Channel];
+                    var msg = value;
                     if (msg.Item2 != s.Title || msg.Item3 != s.GameName)
                     {
                         string thumburl = Globals.EditPreviewURL(s.ThumbnailUrl);
@@ -360,9 +357,9 @@ namespace BluBotCore.Services
             try
             {
                 var s = (await API.Helix.Streams.GetStreamsAsync(userIds: new List<string> { e.Channel })).Streams[0];
-                if (lst.ContainsKey(e.Channel))
+                if (lst.TryGetValue(e.Channel, out Tuple<RestUserMessage, string, string, int> value))
                 {
-                    var msg = lst[e.Channel];
+                    var msg = value;
                     await msg.Item1.ModifyAsync(x => x.Embed = eb.Build());
                     lst[e.Channel] = new Tuple<RestUserMessage, string, string, int>(msg.Item1, s.Title, s.GameName, s.ViewerCount);
                 }
@@ -479,10 +476,10 @@ namespace BluBotCore.Services
                 var s = (await API.Helix.Streams.GetStreamsAsync(userLogins: new List<string> { channel })).Streams[0];
                 Console.WriteLine($"{Globals.CurrentTime} Monitor     {s.UserName} was removed manually.");
 
-                if (_liveEmbeds.ContainsKey(s.UserId))
+                if (_liveEmbeds.TryGetValue(s.UserId, out Tuple<RestUserMessage, string, string, int> value))
                 {
                     await Task.Delay(250);
-                    RestUserMessage embed = _liveEmbeds[s.UserId].Item1;
+                    RestUserMessage embed = value.Item1;
                     if (_client.ConnectionState == ConnectionState.Connected)
                         await embed.DeleteAsync();
                     _liveEmbeds.TryRemove(s.UserId, out Tuple<RestUserMessage, string, string, int> outResult);

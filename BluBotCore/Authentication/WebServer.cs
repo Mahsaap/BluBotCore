@@ -11,7 +11,7 @@ namespace BluBotCore.Authentication
 {
     public class WebServer
     {
-        private HttpListener listener;
+        private readonly HttpListener listener;
 
         public WebServer(string uri)
         {
@@ -22,10 +22,10 @@ namespace BluBotCore.Authentication
         public async Task<Models.Authorization> Listen()
         {
             listener.Start();
-            return await onRequest();
+            return await OnRequest();
         }
 
-        private async Task<Models.Authorization> onRequest()
+        private async Task<Models.Authorization> OnRequest()
         {
             while (listener.IsListening)
             {
